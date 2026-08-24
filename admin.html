@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>밍지의 수달강화하기 V30 ADMIN</title>
+<style>
+:root{--ink:#17343c;--muted:#6f858b;--line:#d8e8ea;--card:#fff;--bg:#edf8fa;--accent:#ff835c;--dark:#294a52;--good:#1d9a69;--bad:#d94d5a;--shadow:0 14px 40px #294a5218}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Noto Sans KR","Malgun Gothic",sans-serif;background:linear-gradient(145deg,#eafcff,#fff4e2);color:var(--ink)}button,input,textarea,select{font:inherit}.wrap{max-width:1220px;margin:auto;padding:16px}.top{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#ffffffd9;border:1px solid #fff;border-radius:20px;padding:13px 16px;box-shadow:var(--shadow);position:sticky;top:8px;z-index:10}.brand{font-weight:1000;font-size:24px}.brand b{color:var(--accent)}.badge{font-size:12px;font-weight:900;padding:7px 10px;border-radius:999px;background:#eff8f9;border:1px solid var(--line)}.grid{display:grid;grid-template-columns:260px minmax(0,1fr);gap:14px;margin-top:14px}.side,.main{background:#ffffffdc;border:1px solid #fff;border-radius:22px;box-shadow:var(--shadow)}.side{padding:12px;height:max-content;position:sticky;top:84px}.main{padding:16px;min-height:650px}.nav{width:100%;border:0;background:transparent;text-align:left;padding:11px 12px;border-radius:12px;font-weight:900;color:#526c72;margin:2px 0}.nav.on{background:var(--dark);color:#fff}.panel{display:none}.panel.on{display:block}.h1{font-size:22px;font-weight:1000;margin:0 0 12px}.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.card,.box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:12px}.card small{color:var(--muted);font-weight:800}.card b{display:block;font-size:22px;margin-top:4px}.row{display:grid;grid-template-columns:1fr 1fr;gap:9px}.field{margin-bottom:10px}.field label{display:block;font-size:12px;font-weight:900;color:#5a7379;margin:0 0 5px 3px}.field input,.field textarea,.field select{width:100%;border:1px solid var(--line);border-radius:12px;padding:10px;background:#fbffff}.field textarea{min-height:90px;resize:vertical}.btn{border:0;border-radius:12px;padding:10px 12px;font-weight:1000;cursor:pointer}.primary{background:var(--accent);color:#fff}.dark{background:var(--dark);color:#fff}.ghost{background:#eff7f8;color:#36555d;border:1px solid var(--line)}.good{background:#e1f7ed;color:#14724f}.danger{background:#fff0f1;color:var(--bad);border:1px solid #ffd0d4}.actions{display:flex;gap:7px;flex-wrap:wrap}.login{max-width:520px;margin:40px auto;background:#fff;border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow)}.notice{padding:10px 12px;border-radius:12px;background:#fff8dc;border:1px solid #ead98e;font-size:12px;line-height:1.55;margin-bottom:10px}.goodnote{background:#eafaf3;border-color:#bee9d5}.badnote{background:#fff0f1;border-color:#ffd0d4}.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:14px}.table{width:100%;border-collapse:collapse;min-width:760px;font-size:12px}.table th,.table td{padding:9px;border-bottom:1px solid #e6eff0;text-align:left;white-space:nowrap}.table th{background:#eff7f8;position:sticky;top:0}.table td.num{text-align:right;font-weight:900}.tiny{padding:6px 8px;border-radius:9px;font-size:11px}.pill{display:inline-block;padding:3px 7px;border-radius:999px;font-size:10px;font-weight:900}.on{background:#e3f8ef;color:#17734f}.off{background:#f2f2f2;color:#777}.hiddenScore{background:#fff0f1;color:#b33}.section{font-size:16px;font-weight:1000;margin:18px 0 8px}.statusline{font-size:12px;color:var(--muted)}pre{white-space:pre-wrap;word-break:break-word;background:#17343c;color:#dff5f5;border-radius:12px;padding:10px;max-height:340px;overflow:auto}.hidden{display:none!important}@media(max-width:850px){.grid{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto}.nav{width:auto;white-space:nowrap}.cards{grid-template-columns:1fr 1fr}.row{grid-template-columns:1fr}}@media(max-width:520px){.cards{grid-template-columns:1fr}.wrap{padding:8px}.main{padding:12px}}
+</style></head><body><div class="wrap"><div class="top"><div class="brand"><b>밍지의 수달강화하기</b> V30 ADMIN</div><div class="badge" id="topStatus">로그인 필요</div></div>
+<div id="loginView" class="login"><div class="h1">🔐 관리자 로그인</div><div class="notice">이 페이지는 Supabase 이메일 계정으로 로그인합니다. 처음 한 번은 계정 가입 후 이메일 인증이 필요할 수 있습니다. <b>Secret/service_role 키는 사용하지 않습니다.</b></div><div class="field"><label>이메일</label><input id="email" type="email" autocomplete="username"></div><div class="field"><label>비밀번호</label><input id="password" type="password" autocomplete="current-password"></div><div class="actions"><button class="btn primary" onclick="signIn()">로그인</button><button class="btn ghost" onclick="signUp()">관리자 계정 가입</button></div><div id="loginMsg" class="statusline" style="margin-top:10px"></div></div>
+<div id="adminView" class="grid hidden"><aside class="side"><button class="nav on" data-tab="dash" onclick="tab('dash')">📊 대시보드</button><button class="nav" data-tab="presence" onclick="tab('presence')">🟢 접속자</button><button class="nav" data-tab="ops" onclick="tab('ops')">📣 운영 설정</button><button class="nav" data-tab="schedule" onclick="tab('schedule')">⏰ 이벤트 예약</button><button class="nav" data-tab="notice" onclick="tab('notice')">📢 공지 관리</button><button class="nav" data-tab="coupon" onclick="tab('coupon')">🎟️ 쿠폰 관리</button><button class="nav" data-tab="rank" onclick="tab('rank')">🏆 랭킹 관리</button><button class="nav" data-tab="reward" onclick="tab('reward')">🎁 개별 보상</button><button class="nav" data-tab="global" onclick="tab('global')">🌍 전체 보상</button><button class="nav" data-tab="users" onclick="tab('users')">👥 유저 관리</button><button class="nav" data-tab="security" onclick="tab('security')">🚨 이상 기록</button><button class="nav" data-tab="analytics" onclick="tab('analytics')">📈 운영 통계</button><button class="nav" data-tab="backup" onclick="tab('backup')">🗄️ 백업 현황</button><button class="nav" data-tab="log" onclick="tab('log')">🧾 운영 로그</button><button class="nav" onclick="signOut()">🚪 로그아웃</button></aside><main class="main">
+<section class="panel on" id="p-dash"><div class="h1">📊 운영 대시보드</div><div id="firstAdminBox" class="notice hidden"><b>최초 관리자 등록이 필요합니다.</b><br>관리자가 아직 0명일 때만 이 버튼을 사용할 수 있습니다.<br><button class="btn primary" style="margin-top:8px" onclick="claimFirstAdmin()">내 계정을 최초 관리자로 등록</button></div><div class="cards"><div class="card"><small>가입 사용자</small><b id="mUsers">-</b></div><div class="card"><small>현재 온라인</small><b id="mOnline">-</b></div><div class="card"><small>오늘 접속</small><b id="mToday">-</b></div><div class="card"><small>랭킹 기록</small><b id="mRanks">-</b></div><div class="card"><small>활성 쿠폰</small><b id="mCoupons">-</b></div><div class="card"><small>쿠폰 사용</small><b id="mRedeems">-</b></div><div class="card"><small>숨김 랭킹</small><b id="mHidden">-</b></div><div class="card"><small>미수령 운영보상</small><b id="mRewards">-</b></div><div class="card"><small>점검 모드</small><b id="mMaint">-</b></div><div class="card"><small>예약 이벤트</small><b id="mSchedules">-</b></div><div class="card"><small>활성 공지</small><b id="mNotices">-</b></div><div class="card"><small>전체 보상</small><b id="mGlobals">-</b></div><div class="card"><small>관리자 상태</small><b id="mAdmin">-</b></div></div><div class="actions" style="margin-top:12px"><button class="btn ghost" onclick="refreshAll()">🔄 전체 새로고침</button></div></section>
+<section class="panel" id="p-presence"><div class="h1">🟢 실시간 접속자</div><div class="notice goodnote">최근 60초 이내 heartbeat가 확인된 플레이어를 온라인으로 표시합니다. 이 화면은 10초마다 자동 갱신됩니다.</div><div class="tablewrap"><table class="table"><thead><tr><th>닉네임</th><th>최고 강화</th><th>상태</th><th>최근 활동</th><th>User ID</th></tr></thead><tbody id="presenceRows"></tbody></table></div></section><section class="panel" id="p-ops"><div class="h1">📣 운영 설정</div><div class="box"><div class="field"><label>게임 공지</label><textarea id="announcement" placeholder="게임 상단에 표시할 공지"></textarea></div><div class="row"><div class="field"><label>점검 모드</label><select id="maintenance"><option value="false">OFF</option><option value="true">ON</option></select></div><div class="field"><label>운영 이벤트</label><select id="eventActive"><option value="false">OFF</option><option value="true">ON</option></select></div></div><div class="field"><label>이벤트 이름</label><input id="eventName" value="운영 이벤트"></div><div class="row"><div class="field"><label>성공률 보너스 (%p)</label><input id="eventChance" type="number" step="0.5" value="0"></div><div class="field"><label>희귀 발견 보너스 (%p)</label><input id="eventRare" type="number" step="0.5" value="0"></div></div><div class="row"><div class="field"><label>강화 비용 배율 (예: 0.8)</label><input id="eventCost" type="number" min="0.1" step="0.05" value="1"></div><div class="field"><label>판매가 배율 (예: 1.5)</label><input id="eventSell" type="number" min="0.1" step="0.05" value="1"></div></div><button class="btn primary" onclick="saveOps()">운영 설정 저장</button></div></section>
+<section class="panel" id="p-schedule"><div class="h1">⏰ 이벤트 예약</div><div class="box"><div class="field"><label>이벤트 이름</label><input id="sName" value="주말 강화 이벤트"></div><div class="row"><div class="field"><label>시작</label><input id="sStart" type="datetime-local"></div><div class="field"><label>종료</label><input id="sEnd" type="datetime-local"></div></div><div class="row"><div class="field"><label>성공률 보너스 (%p)</label><input id="sChance" type="number" step="0.5" value="0"></div><div class="field"><label>희귀 보너스 (%p)</label><input id="sRare" type="number" step="0.5" value="0"></div></div><div class="row"><div class="field"><label>강화 비용 배율</label><input id="sCost" type="number" min="0.1" step="0.05" value="1"></div><div class="field"><label>판매가 배율</label><input id="sSell" type="number" min="0.1" step="0.05" value="1"></div></div><button class="btn primary" onclick="createSchedule()">예약 이벤트 생성</button></div><div class="section">예약 목록</div><div class="tablewrap"><table class="table"><thead><tr><th>이름</th><th>기간</th><th>효과</th><th>상태</th><th>관리</th></tr></thead><tbody id="scheduleRows"></tbody></table></div></section><section class="panel" id="p-notice"><div class="h1">📢 공지 관리</div><div class="box"><div class="row"><div class="field"><label>공지 유형</label><select id="nType"><option value="info">일반</option><option value="event">이벤트</option><option value="urgent">긴급</option><option value="maintenance">점검</option></select></div><div class="field"><label>우선순위</label><input id="nPriority" type="number" min="0" max="100" value="10"></div></div><div class="field"><label>제목</label><input id="nTitle" placeholder="공지 제목"></div><div class="field"><label>내용</label><textarea id="nMessage" placeholder="플레이어에게 표시할 내용"></textarea></div><div class="row"><div class="field"><label>시작 (비우면 즉시)</label><input id="nStart" type="datetime-local"></div><div class="field"><label>종료 (비우면 무기한)</label><input id="nEnd" type="datetime-local"></div></div><button class="btn primary" onclick="createNotice()">공지 등록</button></div><div class="section">공지 목록</div><div class="tablewrap"><table class="table"><thead><tr><th>유형</th><th>제목</th><th>기간</th><th>상태</th><th>관리</th></tr></thead><tbody id="noticeRows"></tbody></table></div></section><section class="panel" id="p-coupon"><div class="h1">🎟️ 쿠폰 관리</div><div class="box"><div class="row"><div class="field"><label>쿠폰 코드</label><input id="cCode" placeholder="예: MINGJIEVENT"></div><div class="field"><label>활성 여부</label><select id="cActive"><option value="true">활성</option><option value="false">중지</option></select></div></div><div class="row"><div class="field"><label>조개</label><input id="cMoney" type="number" min="0" value="0"></div><div class="field"><label>추억 조각</label><input id="cFrag" type="number" min="0" value="0"></div></div><div class="row"><div class="field"><label>구조권</label><input id="cTicket" type="number" min="0" value="0"></div><div class="field"><label>명예</label><input id="cHonor" type="number" min="0" value="0"></div></div><div class="row"><div class="field"><label>총 사용 한도 (0=무제한)</label><input id="cMax" type="number" min="0" value="0"></div><div class="field"><label>만료일 (비우면 무기한)</label><input id="cExpire" type="datetime-local"></div></div><button class="btn primary" onclick="saveCoupon()">쿠폰 생성/수정</button></div><div class="section">등록 쿠폰</div><div class="tablewrap"><table class="table"><thead><tr><th>코드</th><th>보상</th><th>상태</th><th>사용</th><th>만료</th><th>관리</th></tr></thead><tbody id="couponRows"></tbody></table></div></section>
+<section class="panel" id="p-rank"><div class="h1">🏆 랭킹 관리</div><div class="notice">비정상 기록은 삭제보다 <b>숨김</b> 처리하는 것을 권장합니다. 숨긴 기록은 일반 온라인 랭킹에서 보이지 않습니다.</div><div class="tablewrap"><table class="table"><thead><tr><th>닉네임</th><th>최고강화</th><th>소지금</th><th>자산검증</th><th>희귀</th><th>성공</th><th>User ID</th><th>상태</th><th>관리</th></tr></thead><tbody id="rankRows"></tbody></table></div></section>
+<section class="panel" id="p-reward"><div class="h1">🎁 개별 보상 지급</div><div class="box"><div class="field"><label>대상 User ID</label><input id="rUser" placeholder="랭킹 화면의 User ID를 복사"></div><div class="row"><div class="field"><label>조개</label><input id="rMoney" type="number" min="0" value="0"></div><div class="field"><label>추억 조각</label><input id="rFrag" type="number" min="0" value="0"></div></div><div class="row"><div class="field"><label>구조권</label><input id="rTicket" type="number" min="0" value="0"></div><div class="field"><label>명예</label><input id="rHonor" type="number" min="0" value="0"></div></div><div class="field"><label>지급 사유</label><input id="rReason" value="운영 보상"></div><button class="btn primary" onclick="grantReward()">보상 지급</button></div><div class="notice goodnote">지급된 보상은 사용자가 다음 온라인 연결/재접속 시 자동으로 수령합니다.</div></section>
+<section class="panel" id="p-global"><div class="h1">🌍 전체 유저 보상</div><div class="notice">생성 시점 이전에 가입한 모든 사용자에게 1회 수령 가능한 보상을 발행합니다. 사용자는 접속 중이면 최대 60초 이내, 재접속 시에는 즉시 받습니다.</div><div class="box"><div class="field"><label>보상 제목</label><input id="gTitle" value="운영 전체 보상"></div><div class="row"><div class="field"><label>조개</label><input id="gMoney" type="number" min="0" value="0"></div><div class="field"><label>추억 조각</label><input id="gFrag" type="number" min="0" value="0"></div></div><div class="row"><div class="field"><label>구조권</label><input id="gTicket" type="number" min="0" value="0"></div><div class="field"><label>명예</label><input id="gHonor" type="number" min="0" value="0"></div></div><div class="field"><label>수령 종료일 (비우면 7일)</label><input id="gEnd" type="datetime-local"></div><button class="btn primary" onclick="createGlobalReward()">전체 보상 발행</button></div><div class="section">발행 목록</div><div class="tablewrap"><table class="table"><thead><tr><th>제목</th><th>보상</th><th>수령</th><th>기간</th><th>상태</th></tr></thead><tbody id="globalRows"></tbody></table></div></section>
+<section class="panel" id="p-users"><div class="h1">👥 V30 유저 관리</div><div class="box"><div class="row"><div class="field"><label>닉네임 / User ID / 플레이어 코드</label><input id="uQuery" placeholder="검색어"></div><div class="field"><label>&nbsp;</label><button class="btn primary" onclick="searchUsersV30()">검색</button></div></div></div><div class="tablewrap"><table class="table"><thead><tr><th>닉네임</th><th>코드</th><th>최고강화</th><th>최근접속</th><th>상태</th><th>관리</th></tr></thead><tbody id="userRowsV30"></tbody></table></div></section>
+<section class="panel" id="p-security"><div class="h1">🚨 V30 이상 기록 검토</div><div class="notice">서버 검증에서 비정상 증가 또는 무결성 문제로 분류된 기록입니다. 자동 영구정지 대신 운영자가 검토하도록 설계했습니다.</div><div class="tablewrap"><table class="table"><thead><tr><th>시각</th><th>닉네임</th><th>분류</th><th>심각도</th><th>상세</th><th>관리</th></tr></thead><tbody id="flagRowsV30"></tbody></table></div></section>
+<section class="panel" id="p-analytics"><div class="h1">📈 V30 운영 통계</div><div class="cards"><div class="card"><small>최근 7일 활성 유저</small><b id="aUsersV30">-</b></div><div class="card"><small>최근 7일 강화</small><b id="aEnhanceV30">-</b></div><div class="card"><small>최근 7일 성공</small><b id="aSuccessV30">-</b></div><div class="card"><small>이상 기록 미처리</small><b id="aFlagsV30">-</b></div></div><div class="section">일별 통계</div><pre id="analyticsRowsV30">불러오는 중...</pre></section>
+<section class="panel" id="p-backup"><div class="h1">🗄️ V30 백업 현황</div><div class="notice">플레이어 자동 백업의 최근 상태를 조회합니다. 관리자 화면에서는 백업 내용을 직접 수정하지 않습니다.</div><div class="tablewrap"><table class="table"><thead><tr><th>닉네임</th><th>슬롯</th><th>백업시각</th><th>User ID</th></tr></thead><tbody id="backupRowsV30"></tbody></table></div></section>
+<section class="panel" id="p-log"><div class="h1">🧾 운영 로그</div><pre id="logRows">로그를 불러오는 중...</pre></section>
+</main></div></div>
+<script>
+const URL='https://znxuywtrdknigdatsjnu.supabase.co';
+const KEY='sb_publishable_xcARBJTvv_fkuBlkrvboKQ_Sk-HrNEw';
+const ADMIN_SESSION_KEY='mingji_admin_session_v2011';
+
+function makeApiError(data,status){
+  const message=(data&&(
+    data.msg||data.message||data.error_description||data.error||data.hint
+  ))||('HTTP '+status);
+  const e=new Error(String(message));
+  e.status=status;
+  e.data=data;
+  return e;
+}
+async function readResponse(res){
+  const raw=await res.text();
+  if(!raw) return null;
+  try{return JSON.parse(raw)}catch{return raw}
+}
+function loadLocalSession(){
+  try{
+    const v=JSON.parse(localStorage.getItem(ADMIN_SESSION_KEY)||'null');
+    return v&&v.access_token?v:null;
+  }catch{return null}
+}
+function saveLocalSession(v){
+  if(v&&v.access_token)localStorage.setItem(ADMIN_SESSION_KEY,JSON.stringify(v));
+  else localStorage.removeItem(ADMIN_SESSION_KEY);
+}
+function sessionFromAuth(data){
+  if(!data||!data.access_token)return null;
+  return {
+    access_token:data.access_token,
+    refresh_token:data.refresh_token||'',
+    expires_at:Math.floor(Date.now()/1000)+(Number(data.expires_in)||3600),
+    user:data.user||null
+  };
+}
+let adminSession=loadLocalSession();
+
+async function authRequest(path,body,token){
+  const headers={
+    'apikey':KEY,
+    'Content-Type':'application/json'
+  };
+  if(token)headers['Authorization']='Bearer '+token;
+  const res=await fetch(URL+path,{
+    method:'POST',
+    headers,
+    body:body===undefined?undefined:JSON.stringify(body),
+    cache:'no-store'
+  });
+  const data=await readResponse(res);
+  if(!res.ok)throw makeApiError(data,res.status);
+  return data;
+}
+async function refreshAdminSession(){
+  if(!adminSession?.refresh_token)return null;
+  try{
+    const data=await authRequest('/auth/v1/token?grant_type=refresh_token',{
+      refresh_token:adminSession.refresh_token
+    });
+    const next=sessionFromAuth(data);
+    if(next){adminSession=next;saveLocalSession(next);return next}
+  }catch(e){
+    adminSession=null;
+    saveLocalSession(null);
+  }
+  return null;
+}
+async function validAdminSession(){
+  if(!adminSession)return null;
+  if((Number(adminSession.expires_at)||0)*1000-Date.now()<60000){
+    await refreshAdminSession();
+  }
+  return adminSession;
+}
+async function rpcDirect(name,args={}){
+  let session=await validAdminSession();
+  if(!session?.access_token)throw new Error('로그인이 필요합니다.');
+  const request=async()=>{
+    const res=await fetch(URL+'/rest/v1/rpc/'+encodeURIComponent(name),{
+      method:'POST',
+      headers:{
+        'apikey':KEY,
+        'Authorization':'Bearer '+session.access_token,
+        'Content-Type':'application/json',
+        'Accept':'application/json'
+      },
+      body:JSON.stringify(args||{}),
+      cache:'no-store'
+    });
+    const data=await readResponse(res);
+    return {res,data};
+  };
+  let {res,data}=await request();
+  if(res.status===401&&adminSession?.refresh_token){
+    session=await refreshAdminSession();
+    if(session)({res,data}=await request());
+  }
+  if(!res.ok)throw makeApiError(data,res.status);
+  return data;
+}
+const sb={
+  rpc:async(name,args={})=>{
+    try{return {data:await rpcDirect(name,args),error:null}}
+    catch(error){return {data:null,error}}
+  },
+  auth:{
+    signUp:async({email,password})=>{
+      try{
+        const data=await authRequest('/auth/v1/signup',{email,password});
+        const session=sessionFromAuth(data);
+        if(session){adminSession=session;saveLocalSession(session)}
+        return {data:{user:data?.user||data||null,session},error:null};
+      }catch(error){return {data:null,error}}
+    },
+    signInWithPassword:async({email,password})=>{
+      try{
+        const data=await authRequest('/auth/v1/token?grant_type=password',{email,password});
+        const session=sessionFromAuth(data);
+        if(!session)throw new Error('로그인 세션을 받지 못했습니다.');
+        adminSession=session;saveLocalSession(session);
+        return {data:{user:session.user,session},error:null};
+      }catch(error){return {data:null,error}}
+    },
+    signOut:async()=>{
+      try{
+        const s=await validAdminSession();
+        if(s?.access_token){
+          await authRequest('/auth/v1/logout',undefined,s.access_token).catch(()=>{});
+        }
+      }finally{
+        adminSession=null;saveLocalSession(null);
+      }
+      return {error:null};
+    },
+    getSession:async()=>{
+      const session=await validAdminSession();
+      return {data:{session},error:null};
+    }
+  }
+};
+let status={signed_in:false,is_admin:false,can_claim_first:false};
+const $=id=>document.getElementById(id), esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+function msg(t,bad=false){$('loginMsg').textContent=t;$('loginMsg').style.color=bad?'#d94d5a':'#526c72'}
+function tab(id){document.querySelectorAll('.nav[data-tab]').forEach(x=>x.classList.toggle('on',x.dataset.tab===id));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('on',x.id==='p-'+id));if(id==='coupon')loadCoupons();if(id==='rank')loadRanks();if(id==='log')loadLogs();if(id==='presence')loadPresence();if(id==='schedule')loadSchedules();if(id==='notice')loadNotices();if(id==='global')loadGlobalRewards();if(id==='users')searchUsersV30();if(id==='security')loadFlagsV30();if(id==='analytics')loadAnalyticsV30();if(id==='backup')loadBackupsV30();}
+async function call(name,args={}){const {data,error}=await sb.rpc(name,args);if(error)throw error;return data}
+async function signUp(){const email=$('email').value.trim(),password=$('password').value;if(!email||password.length<6)return msg('이메일과 6자 이상 비밀번호를 입력하세요.',true);msg('관리자 계정을 생성하는 중입니다...');try{const {data,error}=await sb.auth.signUp({email,password});if(error)throw error;if(data.session){msg('가입 및 로그인 완료');await boot()}else msg('가입 완료. 이메일 인증 링크를 확인한 뒤 로그인하세요.')}catch(e){msg('가입 실패: '+e.message,true)}}
+async function signIn(){const email=$('email').value.trim(),password=$('password').value;if(!email||!password)return msg('이메일과 비밀번호를 입력하세요.',true);msg('로그인 중입니다...');try{const {error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;await boot()}catch(e){msg('로그인 실패: '+e.message,true)}}
+async function signOut(){await sb.auth.signOut();location.reload()}
+async function boot(){try{status=await call('admin_status_v201');$('topStatus').textContent=status.is_admin?'관리자 연결됨':'관리자 권한 필요';$('loginView').classList.add('hidden');$('adminView').classList.remove('hidden');$('firstAdminBox').classList.toggle('hidden',!status.can_claim_first||status.is_admin);$('mAdmin').textContent=status.is_admin?'ADMIN':'NO';if(status.is_admin)await refreshAll();}catch(e){msg('관리자 시스템 SQL이 아직 적용되지 않았습니다: '+e.message,true)}}
+async function claimFirstAdmin(){try{const ok=await call('claim_first_admin_v201');if(!ok)return alert('이미 다른 관리자가 등록되어 있습니다.');alert('최초 관리자 등록 완료');await boot()}catch(e){alert('등록 실패: '+e.message)}}
+async function refreshAll(){if(!status.is_admin)return;await Promise.allSettled([loadDashboard(),loadConfig(),loadCoupons(),loadRanks(),loadLogs(),loadPresence(),loadSchedules(),loadNotices(),loadGlobalRewards()])}
+async function loadDashboard(){const d=await call('admin_dashboard_v205');$('mUsers').textContent=d.auth_users??'-';$('mOnline').textContent=d.online_now??'-';$('mToday').textContent=d.today_active??'-';$('mRanks').textContent=d.leaderboard_total??'-';$('mCoupons').textContent=d.coupons_active??'-';$('mRedeems').textContent=d.coupon_redemptions??'-';$('mHidden').textContent=d.leaderboard_hidden??'-';$('mRewards').textContent=d.pending_rewards??'-';$('mMaint').textContent=d.maintenance===true?'ON':'OFF';$('mSchedules').textContent=d.scheduled_active??'-';$('mNotices').textContent=d.notices_active??'-';$('mGlobals').textContent=d.global_rewards_active??'-'}
+async function loadConfig(){const rows=await call('admin_get_config_v201'),m=Object.fromEntries((rows||[]).map(x=>[x.key,x.value]));$('announcement').value=m.announcement||'';$('maintenance').value=String(!!m.maintenance);$('eventActive').value=String(!!m.event_active);$('eventName').value=m.event_name||'운영 이벤트';$('eventChance').value=Number(m.event_chance_bonus)||0;$('eventRare').value=Number(m.event_rare_bonus)||0;$('eventCost').value=Number(m.event_cost_multiplier)||1;$('eventSell').value=Number(m.event_sell_multiplier)||1}
+async function setCfg(k,v){return call('admin_set_config_v201',{p_key:k,p_value:v})}
+async function saveOps(){try{await Promise.all([setCfg('announcement',$('announcement').value.trim()),setCfg('maintenance',$('maintenance').value==='true'),setCfg('event_active',$('eventActive').value==='true'),setCfg('event_name',$('eventName').value.trim()||'운영 이벤트'),setCfg('event_chance_bonus',Number($('eventChance').value)||0),setCfg('event_rare_bonus',Number($('eventRare').value)||0),setCfg('event_cost_multiplier',Math.max(.1,Number($('eventCost').value)||1)),setCfg('event_sell_multiplier',Math.max(.1,Number($('eventSell').value)||1))]);alert('운영 설정 저장 완료');loadDashboard()}catch(e){alert('저장 실패: '+e.message)}}
+function rewardFrom(prefix){const r={};for(const [id,k] of [[prefix+'Money','money'],[prefix+'Frag','fragments'],[prefix+'Ticket','ticket'],[prefix+'Honor','honor']]){const v=Math.max(0,Math.floor(Number($(id).value)||0));if(v)r[k]=v}return r}
+async function saveCoupon(){const code=$('cCode').value.trim().toUpperCase(),reward=rewardFrom('c');if(!code)return alert('쿠폰 코드를 입력하세요.');if(!Object.keys(reward).length)return alert('보상을 하나 이상 입력하세요.');const exp=$('cExpire').value?new Date($('cExpire').value).toISOString():null;try{await call('admin_upsert_coupon_v201',{p_code:code,p_reward:reward,p_active:$('cActive').value==='true',p_max_uses:Math.max(0,Number($('cMax').value)||0),p_expires_at:exp});$('cCode').value='';alert('쿠폰 저장 완료');loadCoupons();loadDashboard()}catch(e){alert('쿠폰 저장 실패: '+e.message)}}
+async function loadCoupons(){if(!status.is_admin)return;try{const rows=await call('admin_list_coupons_v201');$('couponRows').innerHTML=(rows||[]).map(c=>`<tr><td><b>${esc(c.code)}</b></td><td>${esc(JSON.stringify(c.reward))}</td><td><span class="pill ${c.active?'on':'off'}">${c.active?'활성':'중지'}</span></td><td>${c.used_count}/${c.max_uses||'∞'}</td><td>${c.expires_at?new Date(c.expires_at).toLocaleString():'무기한'}</td><td><button class="btn tiny ${c.active?'danger':'good'}" onclick="toggleCoupon('${esc(c.code)}',${!c.active})">${c.active?'중지':'활성'}</button></td></tr>`).join('')}catch(e){$('couponRows').innerHTML=`<tr><td colspan="6">${esc(e.message)}</td></tr>`}}
+async function toggleCoupon(code,on){try{await call('admin_toggle_coupon_v201',{p_code:code,p_active:on});loadCoupons();loadDashboard()}catch(e){alert(e.message)}}
+async function loadRanks(){if(!status.is_admin)return;try{const rows=await call('admin_list_leaderboard_v201',{p_limit:100});let money=[];try{money=await call('admin_list_money_rank_v3043',{p_limit:500})}catch(_){money=[]}const mm=new Map((money||[]).map(x=>[x.user_id,x]));$('rankRows').innerHTML=(rows||[]).map(r=>{const m=mm.get(r.user_id);return `<tr class="${r.hidden?'hiddenScore':''}"><td><b>${esc(r.nickname)}</b></td><td class="num">+${Number(r.best_level).toLocaleString()}</td><td class="num">${m?'🐚 '+Number(m.money||0).toLocaleString():'-'}</td><td>${m?(m.verified?'<span class="pill on">검증</span>':'<span class="pill off">검토</span>'):'-'}</td><td class="num">${Number(r.rare_count).toLocaleString()}</td><td class="num">${Number(r.success_count).toLocaleString()}</td><td><code>${esc(r.user_id)}</code></td><td>${r.hidden?'숨김':'공개'}</td><td><button class="btn tiny ${r.hidden?'good':'danger'}" onclick="setHidden('${r.user_id}',${!r.hidden})">${r.hidden?'복구':'숨김'}</button> <button class="btn tiny ghost" onclick="pickReward('${r.user_id}')">보상</button></td></tr>`}).join('')}catch(e){$('rankRows').innerHTML=`<tr><td colspan="9">${esc(e.message)}</td></tr>`}}
+async function setHidden(uid,hidden){const note=hidden?(prompt('숨김 사유','비정상 기록')||'비정상 기록'):'';try{await call('admin_set_score_hidden_v201',{p_user_id:uid,p_hidden:hidden,p_note:note});loadRanks();loadDashboard()}catch(e){alert(e.message)}}
+function pickReward(uid){$('rUser').value=uid;tab('reward')}
+async function grantReward(){const uid=$('rUser').value.trim(),reward=rewardFrom('r');if(!uid)return alert('User ID를 입력하세요.');if(!Object.keys(reward).length)return alert('보상을 하나 이상 입력하세요.');try{const id=await call('admin_grant_reward_v201',{p_user_id:uid,p_reward:reward,p_reason:$('rReason').value.trim()||'운영 보상'});alert('보상 지급 예약 완료 · Mail ID '+id);loadDashboard()}catch(e){alert('보상 지급 실패: '+e.message)}}
+
+let presencePoll=null;
+async function loadPresence(){if(!status.is_admin)return;try{const rows=await call('admin_list_presence_v205',{p_limit:200});$('presenceRows').innerHTML=(rows||[]).map(r=>`<tr><td><b>${esc(r.nickname)}</b></td><td>+${Number(r.best_level||0).toLocaleString()}</td><td><span class="pill ${r.online?'on':'off'}">${r.online?'온라인':'오프라인'}</span></td><td>${new Date(r.last_seen).toLocaleString()}</td><td><code>${esc(r.user_id)}</code></td></tr>`).join('');clearInterval(presencePoll);presencePoll=setInterval(()=>{if(document.getElementById('p-presence')?.classList.contains('on'))loadPresence()},10000)}catch(e){$('presenceRows').innerHTML=`<tr><td colspan="5">${esc(e.message)}</td></tr>`}}
+async function createSchedule(){const start=$('sStart').value,end=$('sEnd').value;if(!start||!end)return alert('시작과 종료 시간을 입력하세요.');if(new Date(end)<=new Date(start))return alert('종료 시간이 시작보다 늦어야 합니다.');try{await call('admin_create_schedule_v205',{p_name:$('sName').value.trim()||'예약 이벤트',p_start_at:new Date(start).toISOString(),p_end_at:new Date(end).toISOString(),p_chance_bonus:Number($('sChance').value)||0,p_rare_bonus:Number($('sRare').value)||0,p_cost_mult:Math.max(.1,Number($('sCost').value)||1),p_sell_mult:Math.max(.1,Number($('sSell').value)||1)});alert('이벤트 예약 완료');loadSchedules();loadDashboard()}catch(e){alert('예약 실패: '+e.message)}}
+async function loadSchedules(){if(!status.is_admin)return;try{const rows=await call('admin_list_schedules_v205');$('scheduleRows').innerHTML=(rows||[]).map(r=>`<tr><td><b>${esc(r.name)}</b></td><td>${new Date(r.start_at).toLocaleString()}<br>~ ${new Date(r.end_at).toLocaleString()}</td><td>성공 +${r.chance_bonus}%p · 희귀 +${r.rare_bonus}%p · 비용 ×${r.cost_mult} · 판매 ×${r.sell_mult}</td><td><span class="pill ${r.active?'on':'off'}">${r.active?'활성':'중지'}</span></td><td><button class="btn tiny ${r.active?'danger':'good'}" onclick="toggleSchedule(${r.id},${!r.active})">${r.active?'중지':'활성'}</button></td></tr>`).join('')}catch(e){$('scheduleRows').innerHTML=`<tr><td colspan="5">${esc(e.message)}</td></tr>`}}
+async function toggleSchedule(id,on){try{await call('admin_toggle_schedule_v205',{p_id:id,p_active:on});loadSchedules();loadDashboard()}catch(e){alert(e.message)}}
+async function createNotice(){const title=$('nTitle').value.trim(),message=$('nMessage').value.trim();if(!title||!message)return alert('제목과 내용을 입력하세요.');try{await call('admin_create_notice_v205',{p_type:$('nType').value,p_title:title,p_message:message,p_priority:Math.max(0,Number($('nPriority').value)||0),p_start_at:$('nStart').value?new Date($('nStart').value).toISOString():null,p_end_at:$('nEnd').value?new Date($('nEnd').value).toISOString():null});$('nTitle').value='';$('nMessage').value='';alert('공지 등록 완료');loadNotices();loadDashboard()}catch(e){alert('공지 등록 실패: '+e.message)}}
+async function loadNotices(){if(!status.is_admin)return;try{const rows=await call('admin_list_notices_v205');$('noticeRows').innerHTML=(rows||[]).map(r=>`<tr><td>${esc(r.type)}</td><td><b>${esc(r.title)}</b><br>${esc(r.message)}</td><td>${r.start_at?new Date(r.start_at).toLocaleString():'즉시'}<br>~ ${r.end_at?new Date(r.end_at).toLocaleString():'무기한'}</td><td><span class="pill ${r.active?'on':'off'}">${r.active?'활성':'중지'}</span></td><td><button class="btn tiny ${r.active?'danger':'good'}" onclick="toggleNotice(${r.id},${!r.active})">${r.active?'중지':'활성'}</button></td></tr>`).join('')}catch(e){$('noticeRows').innerHTML=`<tr><td colspan="5">${esc(e.message)}</td></tr>`}}
+async function toggleNotice(id,on){try{await call('admin_toggle_notice_v205',{p_id:id,p_active:on});loadNotices();loadDashboard()}catch(e){alert(e.message)}}
+function globalRewardFrom(){const r={};for(const [id,k] of [['gMoney','money'],['gFrag','fragments'],['gTicket','ticket'],['gHonor','honor']]){const v=Math.max(0,Math.floor(Number($(id).value)||0));if(v)r[k]=v}return r}
+async function createGlobalReward(){const reward=globalRewardFrom();if(!Object.keys(reward).length)return alert('보상을 하나 이상 입력하세요.');const end=$('gEnd').value?new Date($('gEnd').value).toISOString():null;try{await call('admin_create_global_reward_v205',{p_title:$('gTitle').value.trim()||'운영 전체 보상',p_reward:reward,p_end_at:end});alert('전체 보상 발행 완료');loadGlobalRewards();loadDashboard()}catch(e){alert('발행 실패: '+e.message)}}
+async function loadGlobalRewards(){if(!status.is_admin)return;try{const rows=await call('admin_list_global_rewards_v205');$('globalRows').innerHTML=(rows||[]).map(r=>`<tr><td><b>${esc(r.title)}</b></td><td>${esc(JSON.stringify(r.reward))}</td><td>${r.claimed_count}</td><td>${new Date(r.start_at).toLocaleString()}<br>~ ${new Date(r.end_at).toLocaleString()}</td><td><span class="pill ${r.active?'on':'off'}">${r.active?'활성':'중지'}</span></td></tr>`).join('')}catch(e){$('globalRows').innerHTML=`<tr><td colspan="5">${esc(e.message)}</td></tr>`}}
+async function loadLogs(){if(!status.is_admin)return;try{const rows=await call('admin_list_logs_v201',{p_limit:100});$('logRows').textContent=(rows||[]).map(x=>`${new Date(x.created_at).toLocaleString()} | ${x.action} | ${JSON.stringify(x.detail)}`).join('\n')||'운영 로그 없음'}catch(e){$('logRows').textContent=e.message}}
+setInterval(()=>{if(status.is_admin)loadDashboard().catch(()=>{})},15000);
+(async()=>{try{msg('관리자 시스템 연결 준비 완료 · 가입 또는 로그인을 눌러주세요.');const {data}=await sb.auth.getSession();if(data?.session){$('email').value=data.session.user?.email||'';msg('기존 로그인 세션을 확인하는 중입니다...');await boot()}}catch(e){msg('초기화 오류: '+e.message,true)}})();
+
+async function searchUsersV30(){if(!status.is_admin)return;try{const q=String($('uQuery')?.value||'').trim();const rows=await call('admin_search_users_v30',{p_query:q,p_limit:200});$('userRowsV30').innerHTML=(rows||[]).map(r=>`<tr><td><b>${esc(r.nickname)}</b></td><td>${esc(r.player_code||'')}</td><td>+${Number(r.best_level||0).toLocaleString()}</td><td>${r.last_seen?new Date(r.last_seen).toLocaleString():'-'}</td><td>${r.blocked?'<span class="pill hiddenScore">제한</span>':'<span class="pill on">정상</span>'}</td><td><button class="btn tiny danger" onclick="sanctionUserV30('${r.user_id}')">제재</button> <button class="btn tiny good" onclick="clearSanctionV30('${r.user_id}')">해제</button></td></tr>`).join('')||'<tr><td colspan="6">검색 결과 없음</td></tr>'}catch(e){$('userRowsV30').innerHTML=`<tr><td colspan="6">${esc(e.message)}</td></tr>`}}
+async function sanctionUserV30(uid){const type=prompt('제재 유형: warning / rank / suspend / ban','suspend');if(!type)return;const reason=prompt('사유','운영정책 위반')||'운영정책 위반';const hours=Number(prompt('기간(시간), 영구는 0','24'))||0;try{await call('admin_set_sanction_v30',{p_user_id:uid,p_type:type,p_reason:reason,p_hours:hours,p_active:true});alert('제재 적용 완료');searchUsersV30()}catch(e){alert('제재 실패: '+e.message)}}
+async function clearSanctionV30(uid){try{await call('admin_clear_sanction_v30',{p_user_id:uid});alert('활성 제재 해제 완료');searchUsersV30()}catch(e){alert('해제 실패: '+e.message)}}
+async function loadFlagsV30(){if(!status.is_admin)return;try{const rows=await call('admin_list_flags_v30',{p_limit:200});$('flagRowsV30').innerHTML=(rows||[]).map(r=>`<tr><td>${new Date(r.created_at).toLocaleString()}</td><td>${esc(r.nickname||'')}</td><td>${esc(r.category)}</td><td>${Number(r.severity||0)}</td><td>${esc(JSON.stringify(r.detail||{}))}</td><td><button class="btn tiny good" onclick="resolveFlagV30(${r.id})">처리완료</button></td></tr>`).join('')||'<tr><td colspan="6">미처리 이상 기록 없음</td></tr>'}catch(e){$('flagRowsV30').innerHTML=`<tr><td colspan="6">${esc(e.message)}</td></tr>`}}
+async function resolveFlagV30(id){try{await call('admin_resolve_flag_v30',{p_id:id});loadFlagsV30()}catch(e){alert(e.message)}}
+async function loadAnalyticsV30(){if(!status.is_admin)return;try{const d=await call('admin_metrics_v30');$('aUsersV30').textContent=d.active_users_7d??'-';$('aEnhanceV30').textContent=Number(d.enhances_7d||0).toLocaleString();$('aSuccessV30').textContent=Number(d.successes_7d||0).toLocaleString();$('aFlagsV30').textContent=d.open_flags??'-';$('analyticsRowsV30').textContent=JSON.stringify(d.daily||[],null,2)}catch(e){$('analyticsRowsV30').textContent=e.message}}
+async function loadBackupsV30(){if(!status.is_admin)return;try{const rows=await call('admin_list_backups_v30',{p_limit:200});$('backupRowsV30').innerHTML=(rows||[]).map(r=>`<tr><td>${esc(r.nickname||'')}</td><td>${esc(r.backup_slot)}</td><td>${new Date(r.created_at).toLocaleString()}</td><td><code>${esc(r.user_id)}</code></td></tr>`).join('')||'<tr><td colspan="4">백업 기록 없음</td></tr>'}catch(e){$('backupRowsV30').innerHTML=`<tr><td colspan="4">${esc(e.message)}</td></tr>`}}
+
+</script></body></html>
