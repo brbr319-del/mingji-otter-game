@@ -1,0 +1,733 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>밍지의 수달강화하기</title>
+<meta name="description" content="수달을 강화하고 진화시키는 브라우저 강화 게임">
+<style>
+  :root{
+    --bg1:#ecfbff; --bg2:#fff4df; --ink:#17313a; --muted:#6a7d83;
+    --card:#ffffffdd; --line:#d7e7e9; --accent:#ff8a5b; --accent2:#2ea7a0;
+    --shadow:0 18px 50px #31535a20;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100vh; font-family:system-ui,-apple-system,"Noto Sans KR","Malgun Gothic",sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(circle at 15% 10%,#fff 0 8%,transparent 9%),
+      radial-gradient(circle at 90% 15%,#fff8 0 6%,transparent 7%),
+      linear-gradient(145deg,var(--bg1),var(--bg2));
+    overflow-x:hidden;
+  }
+  button{font:inherit}
+  .app{max-width:1080px;margin:0 auto;padding:18px}
+  .topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#ffffffb8;border:1px solid #fff;border-radius:22px;padding:12px 16px;box-shadow:var(--shadow);backdrop-filter:blur(10px);position:sticky;top:10px;z-index:10}
+  .brand{font-weight:1000;letter-spacing:-.04em;font-size:clamp(20px,4vw,34px)}
+  .brand b{color:var(--accent)}
+  .wallet{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .pill{padding:8px 11px;border-radius:999px;background:#f5fbfb;border:1px solid var(--line);font-weight:800;font-size:14px}
+  .layout{display:grid;grid-template-columns:1.25fr .75fr;gap:16px;margin-top:16px}
+  .card{background:var(--card);border:1px solid #fff;border-radius:28px;box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+  .main{padding:22px;min-height:650px;position:relative;overflow:hidden}
+  .side{padding:18px}
+  .mode-row{display:flex;gap:8px;flex-wrap:wrap}
+  .mode{border:1px solid var(--line);background:#fff;border-radius:999px;padding:8px 12px;cursor:pointer;font-weight:900;color:var(--muted)}
+  .mode.active{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .hero{text-align:center;padding:12px 0 0}
+  .level{font-weight:1000;font-size:clamp(34px,8vw,72px);letter-spacing:-.06em;line-height:1}
+  .name{font-weight:900;font-size:clamp(18px,4vw,30px);margin-top:6px;color:#4f696f}
+  .desc{margin:8px auto 0;max-width:560px;color:#667d83;font-size:14px;line-height:1.5}
+
+  .long-rank{margin:14px auto 4px;max-width:620px;border:1px solid #dfeaec;border-radius:20px;background:linear-gradient(180deg,#ffffffd9,#f6ffffc9);padding:12px 14px;text-align:left;box-shadow:0 10px 24px #284a5010}
+  .long-rank-head{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .long-rank-name{font-weight:1000;font-size:16px}.long-rank-name span{font-size:22px;margin-right:6px}
+  .long-rank-next{font-size:12px;font-weight:800;color:#70868c;text-align:right}
+  .rank-progress{height:11px;border-radius:999px;background:#e6f0f1;overflow:hidden;margin-top:9px;border:1px solid #d9e7e9}
+  .rank-progress i{display:block;height:100%;width:0;border-radius:999px;background:linear-gradient(90deg,#54c6a2,#ffd166,#ff8a5b);transition:.35s width}
+  .rank-marks{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-top:8px}
+  .rank-mark{font-size:10px;text-align:center;color:#91a1a5;font-weight:800;padding:4px 2px;border-radius:8px}
+  .rank-mark.on{color:#17313a;background:#fff4cf}
+  .evo-track{display:grid;grid-template-columns:repeat(7,1fr);gap:8px;margin:16px 0 10px}
+  .evo-node{padding:10px 6px;border-radius:16px;border:1px solid var(--line);background:#f8ffff;text-align:center;transition:.2s}
+  .evo-node .icon{display:block;font-size:24px;line-height:1;margin-bottom:5px}
+  .evo-node .lv{display:block;font-size:11px;color:#7a8e94;font-weight:800}
+  .evo-node .ttl{display:block;font-size:12px;font-weight:900}
+  .evo-node.active{transform:translateY(-3px);border-color:#ffd39d;background:linear-gradient(180deg,#fff7df,#fff)}
+  .evo-node.unlocked{box-shadow:0 6px 18px #ffcf6e2a}
+
+  .otter-zone{height:340px;display:grid;place-items:center;position:relative;margin-top:4px}
+  .aura{position:absolute;width:280px;height:280px;border-radius:50%;background:radial-gradient(circle,#ffe89b85,transparent 66%);filter:blur(2px);animation:pulse 2.2s ease-in-out infinite}
+  @keyframes pulse{50%{transform:scale(1.08);opacity:.75}}
+
+  .otter{width:220px;height:250px;position:relative;transform-origin:50% 80%;transition:.25s transform,.25s filter;filter:drop-shadow(0 16px 16px #27434a28);
+    --furBody:#966b4b; --furHead:#9b7050; --furEar:#865e43; --furArm:#8d6346; --outline:#6f4c36; --belly:#e9c9a5; --scarf:#ef6b64; --cape:#95d8ff; --pattern:#ffffff5a;
+  }
+  .otter.pop{animation:pop .45s ease}
+  .otter.fail{animation:shake .45s ease}
+  @keyframes pop{40%{transform:scale(1.15) rotate(-2deg)}70%{transform:scale(.96) rotate(2deg)}}
+  @keyframes shake{20%{transform:translateX(-12px) rotate(-4deg)}40%{transform:translateX(12px) rotate(4deg)}60%{transform:translateX(-8px) rotate(-2deg)}80%{transform:translateX(8px) rotate(2deg)}}
+
+  .ground{position:absolute;bottom:12px;width:220px;height:28px;border-radius:50%;background:#83c9c71f;filter:blur(3px)}
+  .sparkles{position:absolute;inset:-14px;pointer-events:none;z-index:15;display:none}
+  .sparkles span{position:absolute;font-size:18px;color:#fff7b2;filter:drop-shadow(0 0 6px #ffd86c);animation:twinkle 1.8s ease-in-out infinite}
+  .sparkles span:nth-child(1){left:8px;top:28px}.sparkles span:nth-child(2){right:10px;top:36px;animation-delay:.35s}.sparkles span:nth-child(3){left:18px;bottom:30px;animation-delay:.7s}.sparkles span:nth-child(4){right:14px;bottom:16px;animation-delay:1s}
+  @keyframes twinkle{50%{transform:scale(1.25);opacity:.6}}
+  .ring{position:absolute;inset:-18px;border:4px dashed #ffca55;border-radius:50%;display:none;animation:spin 9s linear infinite;opacity:.9}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .wings{position:absolute;left:12px;top:94px;width:196px;height:90px;z-index:0;display:none}
+  .wings:before,.wings:after{content:"";position:absolute;width:72px;height:86px;background:linear-gradient(180deg,#ffffffd0,#d4efff7a);border-radius:60% 40% 60% 40%;border:2px solid #d3e8ef;top:0}
+  .wings:before{left:0;transform:rotate(-24deg)} .wings:after{right:0;transform:scaleX(-1) rotate(-24deg)}
+  .cape{position:absolute;left:48px;top:98px;width:125px;height:102px;border-radius:22px 22px 48px 48px;background:linear-gradient(180deg,var(--cape),#ffffff66);z-index:1;display:none;box-shadow:inset 0 -6px 0 #ffffff28}
+  .tail{position:absolute;width:88px;height:45px;border-radius:70% 90% 70% 90%;background:var(--furBody);right:-38px;bottom:33px;transform:rotate(28deg);border:4px solid var(--outline)}
+  .body{position:absolute;width:166px;height:160px;border-radius:48% 48% 42% 42%;background:linear-gradient(180deg,var(--furBody),var(--furHead));left:27px;bottom:10px;border:4px solid var(--outline);z-index:2}
+  .pattern{position:absolute;left:59px;top:156px;width:100px;height:44px;border-radius:50%;z-index:3;opacity:.85;pointer-events:none}
+  .pattern.dots{background:radial-gradient(circle at 14% 45%,var(--pattern) 0 6px,transparent 7px),radial-gradient(circle at 40% 52%,var(--pattern) 0 5px,transparent 6px),radial-gradient(circle at 64% 42%,var(--pattern) 0 6px,transparent 7px),radial-gradient(circle at 85% 58%,var(--pattern) 0 5px,transparent 6px)}
+  .pattern.stripe{background:repeating-linear-gradient(18deg,transparent 0 9px,var(--pattern) 9px 13px)}
+  .pattern.wave{background:repeating-radial-gradient(circle at 10% 50%, transparent 0 8px, var(--pattern) 8px 10px, transparent 10px 18px)}
+  .pattern.spark{background:radial-gradient(circle at 20% 55%,var(--pattern) 0 4px,transparent 5px),radial-gradient(circle at 50% 36%,var(--pattern) 0 5px,transparent 6px),radial-gradient(circle at 78% 58%,var(--pattern) 0 4px,transparent 5px),linear-gradient(transparent 47%,var(--pattern) 47% 53%,transparent 53%)}
+  .pattern.heart{background:radial-gradient(circle at 28% 42%,var(--pattern) 0 6px,transparent 7px),radial-gradient(circle at 36% 42%,var(--pattern) 0 6px,transparent 7px),linear-gradient(-45deg,transparent 0 36%,var(--pattern) 36% 58%,transparent 58%),linear-gradient(45deg,transparent 0 36%,var(--pattern) 36% 58%,transparent 58%)}
+  .ear{position:absolute;width:44px;height:44px;border-radius:50%;background:var(--furEar);border:4px solid var(--outline);top:6px;z-index:3}.ear.l{left:18px}.ear.r{right:18px}
+  .head{position:absolute;width:176px;height:156px;border-radius:48% 48% 44% 44%;background:var(--furHead);left:20px;top:14px;border:4px solid var(--outline);z-index:4}
+  .muzzle{position:absolute;width:100px;height:74px;border-radius:48%;background:var(--belly);left:60px;top:80px;z-index:5}
+  .eye{position:absolute;width:13px;height:18px;border-radius:50%;background:#20292c;top:70px;z-index:6}.eye.l{left:71px}.eye.r{right:71px}
+  .brow{position:absolute;width:18px;height:4px;border-radius:999px;background:#584136;top:63px;z-index:6;display:none}.brow.l{left:66px;transform:rotate(-8deg)} .brow.r{right:66px;transform:rotate(8deg)}
+  .cheek{position:absolute;width:16px;height:10px;border-radius:50%;background:#ffb2bb;top:103px;z-index:6;opacity:.72}.cheek.l{left:57px}.cheek.r{right:57px}
+  .nose{position:absolute;width:21px;height:15px;border-radius:55% 55% 65% 65%;background:#273236;left:99px;top:96px;z-index:6}
+  .mouth{position:absolute;width:36px;height:18px;border-bottom:3px solid #654536;border-radius:0 0 50% 50%;left:92px;top:109px;z-index:6}
+  .whiskers{position:absolute;left:48px;top:104px;width:126px;height:20px;z-index:5;display:none}
+  .whiskers:before,.whiskers:after{content:"";position:absolute;top:8px;width:46px;height:1px;border-top:2px solid #85614c}
+  .whiskers:before{left:0;box-shadow:0 8px 0 #85614c,0 -8px 0 #85614c;transform:rotate(8deg)}
+  .whiskers:after{right:0;box-shadow:0 8px 0 #85614c,0 -8px 0 #85614c;transform:rotate(-8deg)}
+  .arm{position:absolute;width:60px;height:32px;border-radius:50%;background:var(--furArm);border:4px solid var(--outline);top:136px;z-index:7}.arm.l{left:22px;transform:rotate(18deg)} .arm.r{right:22px;transform:rotate(-18deg)}
+  .scarf{position:absolute;left:56px;top:137px;width:106px;height:24px;border-radius:10px;background:var(--scarf);z-index:5;display:none;box-shadow:0 6px 0 #00000011 inset}
+  .badge{position:absolute;left:50%;top:171px;transform:translateX(-50%);z-index:9;font-size:20px;opacity:.95;display:none}
+  .held-item{position:absolute;left:50%;top:151px;transform:translateX(-50%);z-index:9;font-size:38px;filter:drop-shadow(0 3px 2px #0002)}
+  .accessory{position:absolute;left:50%;top:-10px;transform:translateX(-50%);z-index:10;font-size:40px;filter:drop-shadow(0 4px 2px #0002);display:none}
+  .crown{position:absolute;left:50%;top:-22px;transform:translateX(-50%);z-index:11;font-size:48px;display:none}
+  .halo{position:absolute;left:50%;top:-18px;transform:translateX(-50%);z-index:11;font-size:40px;display:none}
+  .orbital{position:absolute;inset:-6px;pointer-events:none;display:none;z-index:12}
+  .orbital i{position:absolute;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 12px #fff;animation:orbit 4s linear infinite}
+  .orbital i:nth-child(1){top:15px;left:95px}.orbital i:nth-child(2){top:120px;right:-3px;animation-delay:1.3s}.orbital i:nth-child(3){bottom:18px;left:18px;animation-delay:2.1s}.orbital i:nth-child(4){bottom:22px;right:20px;animation-delay:2.8s}
+  @keyframes orbit{50%{transform:scale(1.4);opacity:.5}}
+
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:4px}
+  .stat{border:1px solid var(--line);background:#f9ffff;border-radius:18px;padding:12px;text-align:center}
+  .stat small{display:block;color:var(--muted);font-weight:800}.stat strong{display:block;margin-top:3px;font-size:clamp(16px,3vw,22px)}.chance strong{color:var(--accent2)}
+  .actions{display:grid;grid-template-columns:1.5fr 1fr;gap:10px;margin-top:12px}
+  .btn{border:0;border-radius:18px;padding:15px 12px;cursor:pointer;font-weight:1000;box-shadow:0 7px 0 #0001;transition:.12s transform,.12s filter;user-select:none}
+  .btn:active{transform:translateY(3px);box-shadow:0 3px 0 #0001}
+  .btn.primary{background:linear-gradient(180deg,#ffad69,#ff7e57);color:#fff;font-size:20px}
+  .btn.sell{background:#2f4a52;color:#fff}
+  .btn.ghost{background:#eef7f8;color:#36545b;border:1px solid var(--line)}
+  .btn.danger{background:#fff0f1;color:#d84b58;border:1px solid #ffd4d7}
+  .tip{margin-top:10px;color:var(--muted);font-size:13px;text-align:center;min-height:20px}
+  .section-title{font-size:18px;font-weight:1000;margin:4px 0 10px}
+  .box{border:1px solid var(--line);border-radius:20px;padding:12px;background:#fbffff;margin-bottom:12px}
+  .toggle{display:flex;align-items:center;justify-content:space-between;gap:10px}
+  .switch{width:54px;height:30px;border-radius:999px;background:#dbe6e8;padding:3px;cursor:pointer;transition:.2s}
+  .switch i{display:block;width:24px;height:24px;background:white;border-radius:50%;box-shadow:0 2px 6px #0002;transition:.2s}
+  .switch.on{background:#54c6a2}.switch.on i{transform:translateX(24px)}
+  .shop-item{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:10px 0;border-bottom:1px dashed #dbe7e8}.shop-item:last-child{border-bottom:0}
+  .shop-item b{display:block}.shop-item small{color:var(--muted)}
+  .mini{padding:9px 11px;border:0;border-radius:12px;background:#263f47;color:#fff;font-weight:900;cursor:pointer}
+  .log{height:165px;overflow:auto;border-radius:16px;background:#16323a;color:#d9eff0;padding:10px;font-size:12px;line-height:1.55}.log div{border-bottom:1px solid #ffffff12;padding:3px 0}.log .ok{color:#87f1b9}.log .bad{color:#ff9da5}.log .gold{color:#ffe28b}
+  .collection{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .collect{padding:10px 6px;border:1px solid var(--line);border-radius:16px;background:#fff;text-align:center;opacity:.42;filter:grayscale(1);transition:.2s}
+  .collect b{display:block;font-size:12px;margin-top:2px}.collect span{font-size:22px;display:block}
+  .collect.unlocked{opacity:1;filter:none;background:linear-gradient(180deg,#fff9e9,#fff)}
+
+  .rare-status{margin:10px auto 0;display:none;align-items:center;justify-content:center;gap:8px;width:max-content;max-width:100%;padding:8px 12px;border-radius:999px;font-weight:1000;font-size:13px;background:linear-gradient(90deg,#fff5ba,#ffe6fa,#dff8ff);border:1px solid #ffe09a;box-shadow:0 6px 20px #ffd36e33}
+  .rare-status.show{display:flex;animation:rareGlow 1.6s ease-in-out infinite alternate}
+  @keyframes rareGlow{to{box-shadow:0 8px 26px #ffba5e66;transform:translateY(-1px)}}
+  .fx-layer{position:absolute;inset:0;pointer-events:none;overflow:visible;z-index:30}
+  .fx-particle{position:absolute;left:50%;top:50%;font-size:22px;will-change:transform,opacity;animation:burst .75s ease-out forwards}
+  @keyframes burst{0%{transform:translate(-50%,-50%) scale(.4);opacity:0}15%{opacity:1}100%{transform:translate(calc(-50% + var(--x)),calc(-50% + var(--y))) rotate(var(--r)) scale(1.15);opacity:0}}
+  .screen-flash{position:fixed;inset:0;pointer-events:none;z-index:70;opacity:0;background:#fff}
+  .screen-flash.on{animation:screenFlash .38s ease-out}
+  .screen-flash.bad{background:#ff8590}
+  @keyframes screenFlash{0%{opacity:.55}100%{opacity:0}}
+  .stage-label{position:absolute;right:18px;top:18px;font-size:12px;font-weight:900;color:#587279;background:#ffffffaa;border:1px solid #fff;border-radius:999px;padding:7px 10px;z-index:3}
+  .sound-btn{border:1px solid var(--line);background:#fff;border-radius:12px;padding:8px 10px;font-weight:900;cursor:pointer;color:#36545b}
+  .modal{position:fixed;inset:0;background:#14333ab8;display:none;place-items:center;padding:18px;z-index:20;backdrop-filter:blur(5px)}
+  .modal.show{display:grid}
+  .dialog{max-width:520px;width:100%;background:white;border-radius:28px;padding:22px;box-shadow:0 24px 70px #0005;text-align:center}.dialog h2{font-size:28px;margin:6px 0}.dialog p{color:var(--muted);line-height:1.6}.dialog .row{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  .title-screen{position:fixed;inset:0;background:linear-gradient(160deg,#dff9ff,#fff2d7);z-index:50;display:grid;place-items:center;padding:18px}.title-screen.hide{display:none}
+  .title-card{width:min(700px,100%);text-align:center;background:#ffffffcc;border:1px solid white;border-radius:34px;padding:30px;box-shadow:var(--shadow)}
+  .title-card h1{font-size:clamp(38px,8vw,76px);line-height:.98;letter-spacing:-.07em;margin:10px 0}.title-card h1 em{font-style:normal;color:var(--accent)}
+  .title-otter{font-size:90px;filter:drop-shadow(0 12px 8px #0002);animation:bob 1.8s ease-in-out infinite}
+  @keyframes bob{50%{transform:translateY(-8px) rotate(3deg)}}
+  .title-buttons{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.title-buttons .btn{font-size:18px}
+  .footer{text-align:center;color:#789098;font-size:12px;padding:18px}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:#15333b;color:#fff;padding:11px 16px;border-radius:999px;opacity:0;pointer-events:none;transition:.25s;z-index:60;font-weight:800}.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  @media(max-width:860px){
+    .layout{grid-template-columns:1fr}.main{min-height:auto}.side{padding:14px}.topbar{align-items:flex-start}.wallet{font-size:12px}.pill{padding:7px 9px}
+    .evo-track{grid-template-columns:repeat(4,1fr)}
+    .collection{grid-template-columns:repeat(4,1fr)}
+    .otter{transform:scale(.94)}
+  }
+
+  .profile-pill{cursor:pointer;transition:.15s transform,.15s background}.profile-pill:hover{transform:translateY(-1px);background:#fff}
+  .nickname-box{margin:18px auto 8px;max-width:440px;text-align:left}
+  .nickname-box label{display:block;font-weight:1000;font-size:14px;margin:0 0 7px 4px;color:#456067}
+  .nickname-input{width:100%;border:2px solid #dcebed;background:#fff;border-radius:17px;padding:14px 16px;font-size:18px;font-weight:900;color:#17313a;outline:none;box-shadow:inset 0 2px 0 #00000008;transition:.18s border-color,.18s box-shadow}
+  .nickname-input:focus{border-color:#65c7c0;box-shadow:0 0 0 4px #65c7c025}
+  .nickname-help{font-size:12px;color:#789096;margin:6px 4px 0}
+  .saved-summary{display:none;margin:12px auto 0;max-width:440px;padding:11px 14px;border-radius:16px;background:#f4fbfb;border:1px solid #d9e9ea;text-align:left;font-size:13px;color:#557078}
+  .saved-summary.show{display:block}.saved-summary b{color:#17313a}
+  .player-strip{display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap;margin:10px auto 0}
+  .player-badge{display:inline-flex;align-items:center;gap:7px;padding:7px 11px;border-radius:999px;background:#17313a;color:#fff;font-size:13px;font-weight:900}
+  .player-badge button{border:0;background:#ffffff1e;color:#fff;border-radius:999px;padding:3px 7px;cursor:pointer;font-weight:900}
+  .personal-record{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+  .record-mini{border:1px solid var(--line);border-radius:15px;background:#fff;padding:10px;text-align:center}
+  .record-mini small{display:block;color:#789096;font-weight:800}.record-mini b{font-size:17px}
+
+</style>
+</head>
+<body>
+<div class="title-screen" id="titleScreen">
+  <div class="title-card">
+    <div class="title-otter">🦦</div>
+    <h1><em>밍지의</em><br>수달강화하기</h1>
+    <p>V1.5 플레이어 프로필판 · 닉네임을 만들고 나만의 최고 강화 기록에 도전하세요.</p>
+    <div class="nickname-box">
+      <label for="nicknameInput">플레이어 닉네임</label>
+      <input id="nicknameInput" class="nickname-input" maxlength="12" autocomplete="off" placeholder="예: 밍지" onkeydown="titleEnter(event)">
+      <div class="nickname-help">한글/영문/숫자 사용 가능 · 최대 12자 · 저장 데이터와 함께 보관됩니다.</div>
+    </div>
+    <div class="saved-summary" id="savedSummary"></div>
+    <div class="title-buttons">
+      <button class="btn primary" onclick="startGameFromTitle('cozy')">느긋모드 시작</button>
+      <button class="btn sell" onclick="startGameFromTitle('challenge')">도전모드 시작</button>
+    </div>
+    <p style="font-size:12px;margin:14px 0 0">자동 저장 지원 · 마우스/터치 플레이 · Space/Enter 강화</p>
+  </div>
+</div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand"><b>밍지의</b> 수달강화하기</div>
+    <div class="wallet">
+      <div class="pill profile-pill" onclick="changeNickname()" title="닉네임 변경">👤 <span id="playerNameTop">수달조련사</span></div>
+      <div class="pill">🐚 <span id="money">0</span></div>
+      <div class="pill">🎫 <span id="tickets">0</span></div>
+      <div class="pill">✨ <span id="fragments">0</span></div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="card main">
+      <div class="mode-row">
+        <button id="cozyBtn" class="mode" onclick="setMode('cozy')">느긋모드</button>
+        <button id="challengeBtn" class="mode" onclick="setMode('challenge')">도전모드</button>
+      </div>
+
+      <div class="hero">
+        <div class="level" id="levelText">+0</div>
+        <div class="name" id="otterName">동네 수달</div>
+        <div class="desc" id="otterDesc">작은 조개를 품고 다니는 평범한 수달입니다.</div>
+        <div class="rare-status" id="rareStatus"></div>
+        <div class="player-strip">
+          <div class="player-badge">👤 <span id="playerNameHero">수달조련사</span><button onclick="changeNickname()">변경</button></div>
+        </div>
+        <div class="long-rank" id="longRank">
+          <div class="long-rank-head"><div class="long-rank-name" id="rankName"><span>🦦</span>일반 수달</div><div class="long-rank-next" id="rankNext">다음 등급 +30</div></div>
+          <div class="rank-progress"><i id="rankProgress"></i></div>
+          <div class="rank-marks" id="rankMarks"></div>
+        </div>
+      </div>
+
+      <div class="evo-track" id="evoTrack"></div>
+
+      <div class="otter-zone">
+        <div class="stage-label" id="stageLabel">평화로운 강가</div>
+        <div class="fx-layer" id="fxLayer"></div>
+        <div class="aura" id="aura"></div>
+        <div class="otter" id="otter">
+          <div class="ground"></div>
+          <div class="ring" id="ring"></div>
+          <div class="sparkles" id="sparkles"><span>✦</span><span>✦</span><span>✦</span><span>✦</span></div>
+          <div class="orbital" id="orbital"><i></i><i></i><i></i><i></i></div>
+          <div class="wings" id="wings"></div>
+          <div class="cape" id="cape"></div>
+          <div class="tail"></div>
+          <div class="body"></div>
+          <div class="pattern dots" id="pattern"></div>
+          <div class="ear l"></div><div class="ear r"></div>
+          <div class="head"></div>
+          <div class="scarf" id="scarf"></div>
+          <div class="brow l"></div><div class="brow r"></div>
+          <div class="eye l"></div><div class="eye r"></div>
+          <div class="muzzle"></div>
+          <div class="whiskers" id="whiskers"></div>
+          <div class="cheek l"></div><div class="cheek r"></div>
+          <div class="nose"></div><div class="mouth"></div>
+          <div class="arm l"></div><div class="arm r"></div>
+          <div class="held-item" id="heldItem">🐚</div>
+          <div class="badge" id="badge"></div>
+          <div class="accessory" id="accessory"></div>
+          <div class="crown" id="crown">👑</div>
+          <div class="halo" id="halo">😇</div>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><small>강화 비용</small><strong id="cost">0</strong></div>
+        <div class="stat chance"><small>성공률</small><strong id="chance">100%</strong></div>
+        <div class="stat"><small>판매 가격</small><strong id="sellPrice">0</strong></div>
+      </div>
+
+      <div class="actions">
+        <button class="btn primary" onclick="enhance()">🛠️ 수달 강화하기</button>
+        <button class="btn sell" onclick="sellOtter()">🐚 수달 보내기</button>
+      </div>
+      <div class="tip" id="tip"></div>
+    </section>
+
+    <aside class="card side">
+      <div class="section-title">강화 보조</div>
+      <div class="box toggle">
+        <div><b>🎫 구조권 자동 사용</b><br><small style="color:var(--muted)">파괴 단계 실패 시 수달 보호</small></div>
+        <div class="switch on" id="autoTicket" onclick="toggleAutoTicket()"><i></i></div>
+      </div>
+      <div class="box toggle">
+        <div><b>🔊 효과음</b><br><small style="color:var(--muted)">강화 성공/실패/희귀 발견 사운드</small></div>
+        <button class="sound-btn" id="soundBtn" onclick="toggleSound()">ON</button>
+      </div>
+
+      <div class="section-title">수달 도감</div>
+      <div class="box collection" id="collection"></div>
+
+      <div class="section-title">수달 교환소</div>
+      <div class="box">
+        <div class="shop-item"><div><b>🎫 수달 구조권 1장</b><small>실패 시 현재 수달을 지켜줍니다.</small></div><button class="mini" onclick="buyTicket()">✨ 30</button></div>
+        <div class="shop-item"><div><b>🐚 조개 꾸러미</b><small>강화 보조금 · 50,000 조개</small></div><button class="mini" onclick="buyMoney()">✨ 15</button></div>
+        <div class="shop-item"><div><b>🍪 행운 쿠키</b><small>다음 1회 성공률 +8%p</small></div><button class="mini" onclick="buyLuck()">✨ 25</button></div>
+      </div>
+
+      <div class="section-title">기록</div>
+      <div class="box" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><small>최고 강화</small><br><b id="best">+0</b></div>
+        <div><small>성공 횟수</small><br><b id="successCount">0</b></div>
+        <div><small>실패 횟수</small><br><b id="failCount">0</b></div>
+        <div><small>보낸 수달</small><br><b id="soldCount">0</b></div>
+      </div>
+
+      <div class="section-title">내 프로필</div>
+      <div class="box">
+        <b id="profileName">수달조련사</b>
+        <div class="personal-record">
+          <div class="record-mini"><small>개인 최고 강화</small><b id="profileBest">+0</b></div>
+          <div class="record-mini"><small>희귀 수달 발견</small><b id="profileRare">0회</b></div>
+        </div>
+      </div>
+
+      <div class="section-title">최근 기록</div>
+      <div class="log" id="log"></div>
+
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn ghost" style="flex:1" onclick="saveGame(true)">저장</button>
+        <button class="btn danger" style="flex:1" onclick="confirmReset()">초기화</button>
+      </div>
+    </aside>
+  </main>
+
+  <div class="footer">Original web mini game · 「밍지의 수달강화하기」 V1.5 · LONG-RANK EDITION</div>
+</div>
+
+<div class="modal" id="modal">
+  <div class="dialog">
+    <div style="font-size:72px" id="modalIcon">🦦</div>
+    <h2 id="modalTitle">알림</h2>
+    <p id="modalBody"></p>
+    <div class="row" id="modalButtons"></div>
+  </div>
+</div>
+<div class="screen-flash" id="screenFlash"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SAVE_KEY='mingji_otter_enhance_v1_5';
+const MAX_LEVEL=99999;
+const SHELL_PACKAGE_REWARD=50000;
+const fmt=n=>Math.floor(n).toLocaleString('ko-KR')+' 🐚';
+const cozyChance=[100,95,90,85,80,75,70,65,60,55,50,46,42,38,34,30,27,24,21,18,15,13,11,10,9,8,7,6,5,4];
+const challengeChance=[100,90,82,75,68,61,55,49,43,38,33,29,25,22,19,16,14,12,10,9,8,7,6,5,4,4,3,3,2,2];
+const otterNames=['동네 수달','조개 수집가','말랑 수달','물장구 수달','간식 지킴이','반짝 수달','강물 탐험가','황금 조개 수달','행운의 수달','파도 수달','별빛 수달','달빛 수달','무지개 수달','바다의 수달','진주 수달','대장 수달','수달 기사','수달 마법사','수달 영웅','수달 왕자','수달 왕','전설의 수달','천상의 수달','우주 수달','차원의 수달','시간 수달','운명의 수달','기적의 수달','신화 수달','밍지의 수호수달','초월 수달'];
+const formData=[
+  {start:0,end:4,icon:'🦦',title:'동네',label:'동네 수달',desc:'작은 조개를 품고 다니는 평범한 수달입니다.',palette:{body:'#9d704d',head:'#a87955',ear:'#8a603f',arm:'#946848',outline:'#6f4c36',belly:'#e9c9a5',scarf:'#ef6b64',cape:'#95d8ff',pattern:'#ffffff59'},accessories:['','🌿','🎀','🧢','🕶️'],items:['🐚','🐟','🦐','🍪','🪙'],badges:['','💧','⭐','💚','💙'],pattern:'dots'},
+  {start:5,end:9,icon:'🏕️',title:'탐험',label:'탐험 수달',desc:'강과 숲을 돌아다니며 보물을 모으기 시작한 수달입니다.',palette:{body:'#7eae91',head:'#88bb9d',ear:'#709f82',arm:'#7aa88c',outline:'#4f765e',belly:'#edf6db',scarf:'#ffd166',cape:'#9be7be',pattern:'#f4ffe099'},accessories:['🎒','🧭','🪃','🎣','🛟'],items:['🐟','🗺️','🍀','🪸','⭐'],badges:['🌿','💚','🌈','☀️','⚡'],pattern:'stripe'},
+  {start:10,end:14,icon:'🪄',title:'마법',label:'마법 수달',desc:'반짝이는 마법 조개를 다루는 신비한 수달입니다.',palette:{body:'#c08fd8',head:'#cb9ee2',ear:'#ab79c5',arm:'#b583cf',outline:'#81589b',belly:'#fde9ff',scarf:'#6cd4ff',cape:'#d8bcff',pattern:'#ffffffa0'},accessories:['🪄','🔮','🎩','🦋','💠'],items:['💎','✨','🔮','📘','🌙'],badges:['💜','⭐','🌙','💠','🤍'],pattern:'spark'},
+  {start:15,end:19,icon:'⚔️',title:'기사',label:'수달 기사',desc:'강철 같은 의지로 강을 지키는 기사 수달입니다.',palette:{body:'#7f8fb4',head:'#8a9bc3',ear:'#7080a5',arm:'#7586ae',outline:'#55627f',belly:'#f5f0e5',scarf:'#f0719a',cape:'#ace2ff',pattern:'#eaf2ff99'},accessories:['🛡️','⚔️','🎖️','🪖','🧿'],items:['🪙','⚙️','🧷','💠','🔥'],badges:['💙','⚡','⭐','🩵','🧡'],pattern:'wave'},
+  {start:20,end:24,icon:'👑',title:'왕',label:'수달 왕',desc:'모든 수달을 이끄는 위엄 넘치는 왕의 모습입니다.',palette:{body:'#f0b65d',head:'#f5c16d',ear:'#d79a42',arm:'#e6aa51',outline:'#9a6c2b',belly:'#fff1cf',scarf:'#ff6b6b',cape:'#ffe08c',pattern:'#fff7c799'},accessories:['👑','🏆','🔱','🌟','💫'],items:['👑','💎','🏆','🌟','🎁'],badges:['🧡','💛','⭐','☀️','💚'],pattern:'heart'},
+  {start:25,end:29,icon:'🌌',title:'우주',label:'우주 수달',desc:'별과 시간을 넘나드는 차원급 수달로 각성했습니다.',palette:{body:'#86c8c2',head:'#91d5cf',ear:'#6fb2ac',arm:'#78beb7',outline:'#4e8682',belly:'#eefdf6',scarf:'#ff8f70',cape:'#b4fff3',pattern:'#e6ffff99'},accessories:['🌌','🪐','☄️','🌠','🪄'],items:['🌠','❄️','🔥','🌈','🫧'],badges:['🩵','💫','🌙','⚡','⭐'],pattern:'spark'},
+  {start:30,end:99999,icon:'😇',title:'초월',label:'초월 수달',desc:'밈과 전설을 뛰어넘은 궁극의 수달입니다.',palette:{body:'#ff9ab0',head:'#ffadc0',ear:'#ea849b',arm:'#f293a9',outline:'#a85f71',belly:'#fff3f7',scarf:'#7f8cff',cape:'#ffc6de',pattern:'#fff0f899'},accessories:['😇'],items:['🌟'],badges:['💖'],pattern:'spark'}
+];
+
+const rareOtters=[
+  {id:'pearl',icon:'🫧',name:'진주빛 수달',desc:'물방울처럼 은은한 진주빛이 감도는 희귀 수달',mult:1.35,aura:'185',filter:'saturate(1.15) brightness(1.06)'},
+  {id:'gold',icon:'🌟',name:'황금 수달',desc:'강화 장인들이 가장 만나고 싶어 하는 황금빛 수달',mult:1.60,aura:'48',filter:'sepia(.18) saturate(1.4) brightness(1.08)'},
+  {id:'rainbow',icon:'🌈',name:'무지개 수달',desc:'일곱 빛깔 오라를 두른 매우 희귀한 수달',mult:1.90,aura:'315',filter:'saturate(1.65) contrast(1.04)'},
+  {id:'star',icon:'🌌',name:'별의 수달',desc:'별가루가 몸 주변을 맴도는 전설급 특수 수달',mult:2.25,aura:'250',filter:'hue-rotate(18deg) saturate(1.35) brightness(1.08)'}
+];
+const stageData=[
+  {min:0,name:'평화로운 강가',bg:'radial-gradient(circle at 15% 10%,#fff 0 8%,transparent 9%),radial-gradient(circle at 90% 15%,#fff8 0 6%,transparent 7%),linear-gradient(145deg,#ecfbff,#fff4df)'},
+  {min:5,name:'초록 탐험지',bg:'radial-gradient(circle at 20% 10%,#eaffdd 0 9%,transparent 10%),linear-gradient(145deg,#dff8e8,#e7f7ff 55%,#fff4d8)'},
+  {min:10,name:'마법의 호수',bg:'radial-gradient(circle at 50% 5%,#f4dcff 0 12%,transparent 30%),linear-gradient(145deg,#e7e3ff,#e1fbff 55%,#fff0fa)'},
+  {min:15,name:'수달 왕국',bg:'radial-gradient(circle at 80% 8%,#fff4ba 0 11%,transparent 25%),linear-gradient(145deg,#e6efff,#fff4d4 55%,#e8f9ff)'},
+  {min:20,name:'황금 궁전',bg:'radial-gradient(circle at 50% 3%,#fffbd2 0 12%,transparent 29%),linear-gradient(145deg,#fff0bd,#ffe2ca 55%,#fff9e7)'},
+  {min:25,name:'별의 차원',bg:'radial-gradient(circle at 20% 14%,#ffffffbb 0 2px,transparent 3px),radial-gradient(circle at 75% 9%,#ffffffaa 0 2px,transparent 3px),radial-gradient(circle at 50% 35%,#8ae8ff44 0 8%,transparent 35%),linear-gradient(145deg,#cdd5ff,#d9f4ff 55%,#efdcff)'},
+  {min:30,name:'초월의 영역',bg:'radial-gradient(circle at 50% 5%,#ffffff 0 5%,#fff5bd55 18%,transparent 35%),linear-gradient(145deg,#ffdff0,#dffbff 45%,#fff2b8)'},
+  {min:100,name:'신화의 성역',bg:'radial-gradient(circle at 18% 12%,#ffffffaa 0 2px,transparent 3px),radial-gradient(circle at 82% 14%,#fff7aacc 0 3px,transparent 4px),linear-gradient(145deg,#f4e3ff,#d9eeff 48%,#fff3cf)'},
+  {min:500,name:'우주의 바다',bg:'radial-gradient(circle at 20% 15%,#fff 0 2px,transparent 3px),radial-gradient(circle at 72% 20%,#fff 0 2px,transparent 3px),radial-gradient(circle at 55% 5%,#77d9ff55 0 9%,transparent 35%),linear-gradient(145deg,#c9d3ff,#d8caff 48%,#bdefff)'},
+  {min:1000,name:'차원의 틈',bg:'radial-gradient(circle at 50% 12%,#ffffff88 0 4%,transparent 24%),linear-gradient(145deg,#d6c7ff,#c5f5ff 45%,#ffd6f1)'},
+  {min:10000,name:'창조의 정원',bg:'radial-gradient(circle at 15% 10%,#fff9bbcc 0 6%,transparent 22%),radial-gradient(circle at 84% 12%,#d9ffffcc 0 6%,transparent 22%),linear-gradient(145deg,#fff0b8,#d9fff1 42%,#e6ddff)'},
+  {min:99999,name:'밍지의 궁극 영역',bg:'radial-gradient(circle at 50% 8%,#ffffff 0 8%,#fff2a788 18%,transparent 36%),linear-gradient(145deg,#ffd4e7,#fff1a8 38%,#cffff3 70%,#e3d2ff)'}
+];
+const rankData=[
+  {min:0,icon:'🦦',title:'일반 수달'},
+  {min:30,icon:'😇',title:'초월 수달'},
+  {min:100,icon:'🌟',title:'신화 수달'},
+  {min:500,icon:'🌌',title:'우주 수달'},
+  {min:1000,icon:'🌀',title:'차원 수달'},
+  {min:10000,icon:'🌈',title:'창조 수달'},
+  {min:99999,icon:'👑',title:'밍지의 궁극 수달'}
+];
+let audioCtx=null;
+
+
+function defaultState(mode='cozy'){
+  return {playerName:'수달조련사', mode, level:0, money:25000, tickets:1, fragments:0, luck:0, autoTicket:true, soundOn:true, rareSkin:null, rareFinds:0, best:0, successCount:0, failCount:0, soldCount:0, logs:['게임을 시작했습니다. 수달을 강화해 보세요!']};
+}
+let s=defaultState();
+
+function post30Growth(level){return Math.pow(1 + Math.max(0,level-30)/300, 2.2);}
+function baseCostFor(level){
+  if(level<=30) return Math.round(500 * Math.pow(1.54, level));
+  const base30=Math.round(500 * Math.pow(1.54, 30));
+  return Math.round(base30 * post30Growth(level));
+}
+function baseSellFor(level){
+  if(level===0) return 300;
+  if(level<=30) return Math.round(650 * Math.pow(1.73, level));
+  const base30=Math.round(650 * Math.pow(1.73, 30));
+  return Math.round(base30 * post30Growth(level));
+}
+function costFor(level){return Math.round(baseCostFor(level) * (s.mode==='challenge'?1.08:1));}
+function sellFor(level){const base=baseSellFor(level); const rare=s.rareSkin?rareOtters.find(r=>r.id===s.rareSkin):null; return Math.round(base*(rare?rare.mult:1));}
+function fragmentReward(level){return Math.max(2,Math.floor(Math.pow(level+1,1.22)));}
+function destroyFrom(){return s.mode==='challenge'?7:10;}
+function chanceFor(level){const arr=s.mode==='challenge'?challengeChance:cozyChance; return Math.min(100,(arr[Math.min(level,arr.length-1)]||2)+(s.luck>0?8:0));}
+function rankFor(level){let r=rankData[0]; for(const item of rankData){if(level>=item.min)r=item;} return r;}
+function nextRankFor(level){return rankData.find(item=>item.min>level)||null;}
+function tierName(level){if(level<=30)return otterNames[Math.min(level,otterNames.length-1)]||'초월 수달'; const r=rankFor(level); return `${r.title} · ${level.toLocaleString('ko-KR')}단계`;}
+function fmtNum(n){return Number.isFinite(n)?Math.floor(n).toLocaleString('ko-KR'):'MAX';}
+function escapeHtml(t){return String(t).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));}
+function log(msg){s.logs.push(msg); if(s.logs.length>80)s.logs=s.logs.slice(-80);}
+function formFor(level){return formData.find(f=>level>=f.start && level<=f.end) || formData[formData.length-1];}
+
+function currentRare(){return s.rareSkin ? rareOtters.find(r=>r.id===s.rareSkin) : null;}
+function stageFor(level){let found=stageData[0]; for(const st of stageData){if(level>=st.min)found=st;} return found;}
+function renderStage(level){const st=stageFor(level); document.body.style.background=st.bg; document.getElementById('stageLabel').textContent=st.name;}
+function toggleSound(){s.soundOn=!s.soundOn; document.getElementById('soundBtn').textContent=s.soundOn?'ON':'OFF'; saveGame(false); if(s.soundOn)playTone('click');}
+function ensureAudio(){if(!s.soundOn)return null; if(!audioCtx) audioCtx=new (window.AudioContext||window.webkitAudioContext)(); if(audioCtx.state==='suspended') audioCtx.resume(); return audioCtx;}
+function tone(freq,dur=.12,type='sine',gain=.06,delay=0){const ctx=ensureAudio(); if(!ctx)return; const o=ctx.createOscillator(), g=ctx.createGain(); o.type=type;o.frequency.value=freq;g.gain.setValueAtTime(gain,ctx.currentTime+delay);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+delay+dur);o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+delay);o.stop(ctx.currentTime+delay+dur);}
+function playTone(kind){if(!s.soundOn)return; if(kind==='success'){tone(520,.13,'triangle',.07);tone(660,.16,'triangle',.06,.08);tone(820,.18,'sine',.05,.16);}else if(kind==='fail'){tone(220,.18,'sawtooth',.045);tone(170,.22,'sawtooth',.035,.08);}else if(kind==='rare'){tone(660,.16,'sine',.06);tone(880,.18,'sine',.06,.09);tone(1100,.22,'triangle',.05,.19);tone(1320,.25,'sine',.04,.31);}else if(kind==='click'){tone(420,.08,'sine',.03);}}
+function flash(bad=false){const f=document.getElementById('screenFlash');f.classList.remove('on','bad');void f.offsetWidth;if(bad)f.classList.add('bad');f.classList.add('on');}
+function burst(kind='success'){const layer=document.getElementById('fxLayer'); const glyphs=kind==='fail'?['💢','✕','💥']:kind==='rare'?['🌟','✨','💎','🌈']:['✨','⭐','✦','🫧']; for(let i=0;i<16;i++){const p=document.createElement('span');p.className='fx-particle';p.textContent=glyphs[i%glyphs.length];const a=(Math.PI*2*i/16)+(Math.random()-.5)*.35;const d=70+Math.random()*110;p.style.setProperty('--x',Math.cos(a)*d+'px');p.style.setProperty('--y',Math.sin(a)*d+'px');p.style.setProperty('--r',(Math.random()*280-140)+'deg');p.style.animationDelay=(Math.random()*.08)+'s';layer.appendChild(p);setTimeout(()=>p.remove(),950);}}
+function maybeRareDrop(){if(s.level<3 || s.rareSkin)return false; const rate=s.mode==='challenge'?0.075:0.055; if(Math.random()>=rate)return false; let pool=rareOtters; const roll=Math.random(); let rare=roll<.55?pool[0]:roll<.82?pool[1]:roll<.96?pool[2]:pool[3]; s.rareSkin=rare.id;s.rareFinds=(s.rareFinds||0)+1;log(`🌟 희귀 발견! ${rare.name} — 판매가 x${rare.mult.toFixed(2)}`);return rare;}
+
+function renderLongRank(){
+  const r=rankFor(s.level);
+  const next=nextRankFor(s.level);
+  document.getElementById('rankName').innerHTML=`<span>${r.icon}</span>${r.title}`;
+  document.getElementById('rankNext').textContent=next?`다음: ${next.icon} ${next.title} · +${next.min.toLocaleString('ko-KR')}`:'최종 등급 달성';
+  let pct=100;
+  if(next){pct=Math.max(0,Math.min(100,((s.level-r.min)/(next.min-r.min))*100));}
+  document.getElementById('rankProgress').style.width=pct.toFixed(2)+'%';
+  document.getElementById('rankMarks').innerHTML=rankData.slice(1).map(item=>`<div class="rank-mark ${s.best>=item.min?'on':''}">+${item.min.toLocaleString('ko-KR')}<br>${item.title.replace(' 수달','')}</div>`).join('');
+}
+
+function renderTrack(){
+  const current=formFor(s.level);
+  document.getElementById('evoTrack').innerHTML=formData.map(f=>{
+    const unlocked=s.best>=f.start || s.level>=f.start;
+    const active=s.level>=f.start && s.level<=f.end;
+    return `<div class="evo-node ${unlocked?'unlocked':''} ${active?'active':''}"><span class="icon">${f.icon}</span><span class="lv">+${f.start}${f.end!==f.start?' ~ +'+f.end:''}</span><span class="ttl">${f.title}</span></div>`;
+  }).join('');
+}
+
+function renderCollection(){
+  const forms=formData.map(f=>{
+    const unlocked=s.best>=f.start || s.level>=f.start;
+    return `<div class="collect ${unlocked?'unlocked':''}"><span>${f.icon}</span><b>${f.title}</b><small>+${f.start}${f.end!==f.start?'~'+f.end:''}</small></div>`;
+  });
+  const rares=rareOtters.map(r=>{const unlocked=(s.rareFinds||0)>0 && s.rareSkin===r.id; return `<div class="collect ${unlocked?'unlocked':''}"><span>${r.icon}</span><b>${r.name.replace(' 수달','')}</b><small>희귀</small></div>`;});
+  document.getElementById('collection').innerHTML=[...forms,...rares].join('');
+}
+
+const ultraAccessories=['😇','🪐','🌌','☄️','🔱','👑','💫','🌠','🪽','🧿','💎','🌈'];
+const ultraItems=['🌟','💎','🫧','🔥','❄️','🌈','🌙','☀️','⚡','🪐','☄️','✨'];
+const ultraBadges=['💖','⭐','💫','🌌','⚡','🌈','💠','🩵','💜','🧡'];
+const ultraPatterns=['spark','wave','stripe','dots','heart'];
+
+function renderOtterVariant(level){
+  const ot=document.getElementById('otter');
+  const form=formFor(level);
+  const p=form.palette;
+  ot.style.setProperty('--furBody',p.body);
+  ot.style.setProperty('--furHead',p.head);
+  ot.style.setProperty('--furEar',p.ear);
+  ot.style.setProperty('--furArm',p.arm);
+  ot.style.setProperty('--outline',p.outline);
+  ot.style.setProperty('--belly',p.belly);
+  ot.style.setProperty('--scarf',p.scarf);
+  ot.style.setProperty('--cape',p.cape);
+  ot.style.setProperty('--pattern',p.pattern);
+  ot.style.transform=`scale(${1 + Math.min(level,30)*0.014 + (level>30?((level%10)*0.002):0)})`;
+
+  document.getElementById('otterName').textContent=tierName(level);
+  document.getElementById('otterDesc').textContent=form.desc;
+  const step = level - form.start;
+  if(level>30){
+    const hue=(level*37)%360;
+    const hue2=(hue+28)%360;
+    ot.style.setProperty('--furBody',`hsl(${hue} 48% 58%)`);
+    ot.style.setProperty('--furHead',`hsl(${hue2} 52% 64%)`);
+    ot.style.setProperty('--furEar',`hsl(${hue} 42% 48%)`);
+    ot.style.setProperty('--furArm',`hsl(${hue2} 45% 55%)`);
+    ot.style.setProperty('--outline',`hsl(${hue} 34% 34%)`);
+    ot.style.setProperty('--scarf',`hsl(${(hue+150)%360} 82% 67%)`);
+    ot.style.setProperty('--cape',`hsl(${(hue+210)%360} 78% 80%)`);
+    ot.style.setProperty('--pattern',`hsla(${(hue+70)%360},100%,94%,.78)`);
+    document.getElementById('accessory').textContent=ultraAccessories[level%ultraAccessories.length];
+    document.getElementById('heldItem').textContent=ultraItems[level%ultraItems.length];
+    document.getElementById('badge').textContent=ultraBadges[level%ultraBadges.length];
+    document.getElementById('pattern').className='pattern '+ultraPatterns[level%ultraPatterns.length];
+    document.getElementById('otterDesc').textContent=`${rankFor(level).icon} ${rankFor(level).title} · +${level.toLocaleString('ko-KR')} · 강화할 때마다 오라와 장식이 순환 변화합니다.`;
+  }else{
+    document.getElementById('accessory').textContent = form.accessories[Math.min(step, form.accessories.length-1)] || '';
+    document.getElementById('heldItem').textContent = form.items[Math.min(step, form.items.length-1)] || '🐚';
+    document.getElementById('badge').textContent = form.badges[Math.min(step, form.badges.length-1)] || '';
+    document.getElementById('pattern').className = 'pattern ' + form.pattern;
+  }
+
+  const scarf=document.getElementById('scarf');
+  const cape=document.getElementById('cape');
+  const ring=document.getElementById('ring');
+  const sparkles=document.getElementById('sparkles');
+  const wings=document.getElementById('wings');
+  const whiskers=document.getElementById('whiskers');
+  const badge=document.getElementById('badge');
+  const crown=document.getElementById('crown');
+  const halo=document.getElementById('halo');
+  const orbital=document.getElementById('orbital');
+  const accessory=document.getElementById('accessory');
+  const aura=document.getElementById('aura');
+  const rare=currentRare();
+  const rareStatus=document.getElementById('rareStatus');
+  if(rare){
+    rareStatus.className='rare-status show';
+    rareStatus.innerHTML=`<span>${rare.icon}</span><span>${rare.name} · 판매가 x${rare.mult.toFixed(2)}</span>`;
+    ot.style.filter=`drop-shadow(0 16px 16px #27434a28) ${rare.filter}`;
+    aura.style.background=`radial-gradient(circle, hsla(${rare.aura}, 95%, 70%, .68), transparent 68%)`;
+  }else{
+    rareStatus.className='rare-status'; rareStatus.textContent='';
+    ot.style.filter='drop-shadow(0 16px 16px #27434a28)';
+  }
+
+  accessory.style.display = level>0 ? 'block' : 'none';
+  badge.style.display = level>0 ? 'block' : 'none';
+  scarf.style.display = level>=1 ? 'block' : 'none';
+  whiskers.style.display = level>=5 ? 'block' : 'none';
+  cape.style.display = level>=8 ? 'block' : 'none';
+  sparkles.style.display = level>=10 ? 'block' : 'none';
+  ring.style.display = level>=15 ? 'block' : 'none';
+  crown.style.display = level>=20 ? 'block' : 'none';
+  orbital.style.display = level>=25 ? 'block' : 'none';
+  halo.style.display = level>=30 ? 'block' : 'none';
+  wings.style.display = level>=30 ? 'block' : 'none';
+  crown.style.opacity = level>=30 ? '.5' : '1';
+
+  document.querySelectorAll('.brow').forEach(el=>el.style.display=level>=4?'block':'none');
+  document.querySelectorAll('.eye').forEach(el=>{el.style.height = level>=25?'14px':(level>=10?'16px':'18px');});
+  if(!rare) aura.style.background = `radial-gradient(circle, hsla(${(level*37)%360}, 92%, 72%, .52), transparent 66%)`;
+}
+
+function render(){
+  document.getElementById('money').textContent=fmtNum(s.money);
+  document.getElementById('tickets').textContent=s.tickets;
+  document.getElementById('fragments').textContent=s.fragments;
+  const safeName=s.playerName||'수달조련사';
+  document.getElementById('playerNameTop').textContent=safeName;
+  document.getElementById('playerNameHero').textContent=safeName;
+  document.getElementById('profileName').textContent='👤 '+safeName;
+  document.getElementById('profileBest').textContent='+'+s.best.toLocaleString('ko-KR');
+  document.getElementById('profileRare').textContent=(s.rareFinds||0).toLocaleString('ko-KR')+'회';
+  document.getElementById('levelText').textContent='+'+s.level;
+  document.getElementById('cost').textContent=fmt(costFor(s.level));
+  document.getElementById('chance').textContent=chanceFor(s.level)+'%';
+  document.getElementById('sellPrice').textContent=fmt(sellFor(s.level));
+  document.getElementById('best').textContent='+'+s.best;
+  document.getElementById('successCount').textContent=s.successCount;
+  document.getElementById('failCount').textContent=s.failCount;
+  document.getElementById('soldCount').textContent=s.soldCount;
+  document.getElementById('cozyBtn').classList.toggle('active',s.mode==='cozy');
+  document.getElementById('challengeBtn').classList.toggle('active',s.mode==='challenge');
+  document.getElementById('autoTicket').classList.toggle('on',s.autoTicket);
+  document.getElementById('soundBtn').textContent=s.soundOn?'ON':'OFF';
+  renderStage(s.level);
+  renderLongRank();
+  document.getElementById('tip').textContent = s.luck>0 ? '🍪 행운 쿠키 적용 중! 다음 강화 성공률 +8%p' : (s.level>=destroyFrom() ? '⚠️ 실패 시 수달이 떠날 수 있습니다. 구조권을 확인하세요.' : '최대 +99,999 · +100 신화 / +500 우주 / +1,000 차원 / +10,000 창조 등급에 도전하세요.');
+  const logEl=document.getElementById('log');
+  logEl.innerHTML=s.logs.slice(-22).reverse().map(x=>{const c=x.includes('성공')?'ok':x.includes('실패')||x.includes('떠났')?'bad':x.includes('판매')||x.includes('조개')?'gold':'';return `<div class="${c}">${escapeHtml(x)}</div>`}).join('');
+  renderTrack();
+  renderCollection();
+  renderOtterVariant(s.level);
+  saveGame(false);
+}
+
+function maybeEvolutionPopup(prev,next){
+  const a=formFor(prev), b=formFor(next);
+  if(a.start!==b.start){
+    showModal(b.icon, `${b.label} 진화!`, `수달이 <b>${b.label}</b> 형태로 진화했습니다.<br>${b.desc}`, [{text:'계속 강화',cls:'primary',fn:closeModal}]);
+    return true;
+  }
+  return false;
+}
+
+function enhance(){
+  if(s.level>=MAX_LEVEL){toast('최고 강화 +99,999에 도달했습니다!');return;}
+  const cost=costFor(s.level);
+  if(s.money<cost){toast('조개가 부족합니다. 수달을 보내거나 교환소를 이용하세요.');return;}
+  const prev=s.level;
+  s.money-=cost;
+  const ch=chanceFor(s.level);
+  if(s.luck>0)s.luck=0;
+  const success=Math.random()*100<ch;
+  const ot=document.getElementById('otter');
+  if(success){
+    s.level++; s.successCount++; s.best=Math.max(s.best,s.level);
+    log(`✅ 강화 성공! +${s.level} ${tierName(s.level)} 탄생`);
+    ot.classList.remove('fail'); void ot.offsetWidth; ot.classList.add('pop');
+    playTone('success'); flash(false); burst('success');
+    const rare=maybeRareDrop();
+    render();
+    if(rare){
+      playTone('rare'); burst('rare');
+      showModal(rare.icon,'희귀 수달 발견!',`강화 도중 <b>${rare.name}</b>을 발견했습니다!<br>${rare.desc}<br><br>현재 수달 판매가가 <b>x${rare.mult.toFixed(2)}</b>로 증가합니다.`,[{text:'대박!',cls:'primary',fn:closeModal}]);
+    }else if(!maybeEvolutionPopup(prev,s.level) && [10,20,30,100,500,1000,10000,99999].includes(s.level)){
+      const rank=rankFor(s.level);
+      playTone('rare'); burst('rare');
+      showModal(rank.icon,`${rank.title} 달성!`,`강화 단계 <b>+${s.level.toLocaleString('ko-KR')}</b>에 도달해 <b>${rank.title}</b> 칭호를 획득했습니다!`,[{text:'계속 강화',cls:'primary',fn:closeModal}]);
+    }else if(formFor(prev).start===formFor(s.level).start){
+      toast(`강화 성공! 외형이 더 화려해졌습니다. +${s.level}`);
+    }
+  }else{
+    s.failCount++;
+    ot.classList.remove('pop'); void ot.offsetWidth; ot.classList.add('fail');
+    playTone('fail'); flash(true); burst('fail');
+    const destructive=s.level>=destroyFrom();
+    if(destructive){
+      if(s.autoTicket && s.tickets>0){
+        s.tickets--;
+        log(`🎫 강화 실패! 구조권으로 +${s.level} 수달을 지켰습니다.`);
+        toast('실패! 구조권으로 수달을 지켰습니다.');
+      }else{
+        const reward=fragmentReward(s.level); const old=s.level; s.fragments+=reward; s.level=0; s.rareSkin=null;
+        log(`💥 강화 실패! +${old} 수달이 떠났습니다. 추억 조각 +${reward}`);
+        render();
+        showModal('🌊','수달이 떠났어요!',`강화에 실패해 수달이 강으로 돌아갔습니다.<br>대신 추억 조각 <b>+${reward}</b>을 얻었습니다.`,[{text:'새 수달 만나기',cls:'primary',fn:closeModal}]);
+        return;
+      }
+    }else{
+      if(s.mode==='challenge' && s.level>=4){ s.level=Math.max(0,s.level-1); log(`❌ 강화 실패! 단계가 +${s.level}로 내려갔습니다.`);} else {log(`❌ 강화 실패! +${s.level} 단계 유지`);}
+      toast('아쉽게 실패했습니다.');
+    }
+    render();
+  }
+}
+
+function sellOtter(){
+  const value=sellFor(s.level);
+  showModal('🐚','수달을 보내시겠어요?',`현재 +${s.level} <b>${tierName(s.level)}</b>${currentRare()?` · ${currentRare().icon} ${currentRare().name}`:''}를 자연으로 보내면 <b>${fmtNum(value)} 조개</b>를 받습니다.${currentRare()?'<br><small>희귀 수달 판매 보너스 적용</small>':''}`,[
+    {text:'취소',cls:'ghost',fn:closeModal},
+    {text:'보내기',cls:'sell',fn:()=>{const rare=currentRare();s.money+=value;s.soldCount++;log(`🐚 +${s.level} 수달 판매: ${fmtNum(value)} 조개 획득${rare?' ('+rare.name+' 보너스)':''}`);s.level=0;s.rareSkin=null;closeModal();render();playTone('click');toast('조개를 받았습니다!')}}
+  ]);
+}
+function buyTicket(){if(s.fragments<30){toast('추억 조각이 부족합니다.');return;} s.fragments-=30; s.tickets++; log('🎫 추억 조각 30개로 구조권 1장 교환'); render(); toast('구조권을 얻었습니다.');}
+function buyMoney(){if(s.fragments<15){toast('추억 조각이 부족합니다.');return;} s.fragments-=15; s.money+=SHELL_PACKAGE_REWARD; log(`🐚 추억 조각 15개로 조개 ${fmtNum(SHELL_PACKAGE_REWARD)}개 교환`); render(); toast(`조개 ${fmtNum(SHELL_PACKAGE_REWARD)}개 획득!`);}
+function buyLuck(){if(s.fragments<25){toast('추억 조각이 부족합니다.');return;} if(s.luck>0){toast('이미 행운 쿠키가 적용 중입니다.');return;} s.fragments-=25; s.luck=1; log('🍪 행운 쿠키 사용 준비 완료'); render(); toast('다음 강화 성공률 +8%p!');}
+function toggleAutoTicket(){s.autoTicket=!s.autoTicket; render();}
+function setMode(mode){if(mode===s.mode)return; showModal('🔁','모드를 변경할까요?',`모드를 변경하면 현재 수달은 +0으로 돌아갑니다. 보유 재화와 기록은 유지됩니다.`,[{text:'취소',cls:'ghost',fn:closeModal},{text:'변경',cls:'primary',fn:()=>{s.mode=mode;s.level=0;s.luck=0;s.rareSkin=null;log(`모드 변경: ${mode==='cozy'?'느긋모드':'도전모드'}`);closeModal();render();}}]);}
+function sanitizeNickname(name){
+  return String(name||'').replace(/[<>"'`\\]/g,'').replace(/\s+/g,' ').trim().slice(0,12);
+}
+function findLegacySave(){
+  const keys=[SAVE_KEY,'mingji_otter_enhance_v1_4','mingji_otter_enhance_v1_3_1','mingji_otter_enhance_v1_3','mingji_otter_enhance_v1_2'];
+  for(const key of keys){const raw=localStorage.getItem(key); if(raw)return {key,raw};}
+  return null;
+}
+function loadSavedState(mode){
+  const found=findLegacySave();
+  if(found){
+    try{return {state:{...defaultState(mode),...JSON.parse(found.raw)}, found};}
+    catch(e){return {state:defaultState(mode), found:null};}
+  }
+  return {state:defaultState(mode), found:null};
+}
+function startGameFromTitle(mode){
+  const input=document.getElementById('nicknameInput');
+  const typed=sanitizeNickname(input.value);
+  const loaded=loadSavedState(mode);
+  s=loaded.state;
+  if(typed)s.playerName=typed;
+  if(!s.playerName)s.playerName='수달조련사';
+  if(!loaded.found)s.mode=mode;
+  document.getElementById('titleScreen').classList.add('hide');
+  log(`👤 ${s.playerName} 플레이 시작`);
+  render();
+}
+function startGame(mode){startGameFromTitle(mode);}
+function changeNickname(){
+  const current=s.playerName||'수달조련사';
+  const next=prompt('새 닉네임을 입력하세요. (최대 12자)',current);
+  if(next===null)return;
+  const clean=sanitizeNickname(next);
+  if(!clean){toast('닉네임을 1자 이상 입력해주세요.');return;}
+  s.playerName=clean;
+  log(`👤 닉네임 변경: ${clean}`);
+  render();
+  toast(`닉네임이 ${clean}(으)로 변경되었습니다.`);
+}
+function titleEnter(e){
+  if(e.key==='Enter'){e.preventDefault();startGameFromTitle('cozy');}
+}
+function hydrateTitleProfile(){
+  const loaded=loadSavedState('cozy');
+  const input=document.getElementById('nicknameInput');
+  const summary=document.getElementById('savedSummary');
+  if(loaded.found){
+    const st=loaded.state;
+    input.value=st.playerName&&st.playerName!=='수달조련사'?st.playerName:'';
+    summary.innerHTML=`기존 저장 발견 · <b>${escapeHtml(st.playerName||'수달조련사')}</b> · 최고 <b>+${Number(st.best||0).toLocaleString('ko-KR')}</b> · 현재 <b>+${Number(st.level||0).toLocaleString('ko-KR')}</b>`;
+    summary.classList.add('show');
+  }else{
+    input.value='';
+    summary.classList.remove('show');
+  }
+  setTimeout(()=>input.focus(),80);
+}
+function saveGame(show){localStorage.setItem(SAVE_KEY,JSON.stringify(s)); if(show)toast('저장했습니다.');}
+function confirmReset(){showModal('⚠️','저장 데이터를 초기화할까요?','닉네임, 보유 조개, 강화 단계, 기록이 모두 삭제됩니다.',[{text:'취소',cls:'ghost',fn:closeModal},{text:'초기화',cls:'danger',fn:()=>{[SAVE_KEY,'mingji_otter_enhance_v1_4','mingji_otter_enhance_v1_3_1','mingji_otter_enhance_v1_3','mingji_otter_enhance_v1_2'].forEach(k=>localStorage.removeItem(k));s=defaultState(s.mode);closeModal();render();toast('초기화되었습니다.');}}]);}
+function showModal(icon,title,body,buttons){document.getElementById('modalIcon').textContent=icon; document.getElementById('modalTitle').textContent=title; document.getElementById('modalBody').innerHTML=body; const row=document.getElementById('modalButtons'); row.innerHTML=''; buttons.forEach(b=>{const x=document.createElement('button');x.className='btn '+(b.cls||'ghost');x.textContent=b.text;x.onclick=b.fn;row.appendChild(x);}); document.getElementById('modal').classList.add('show');}
+function closeModal(){document.getElementById('modal').classList.remove('show');}
+let toastTimer; function toast(msg){const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),1800);}
+window.addEventListener('keydown',e=>{if(document.getElementById('titleScreen').classList.contains('hide')){if(e.code==='Space'||e.code==='Enter'){e.preventDefault(); enhance();}}});
+window.addEventListener('DOMContentLoaded',hydrateTitleProfile);
+window.addEventListener('beforeunload',()=>saveGame(false));
+</script>
+</body>
+</html>
