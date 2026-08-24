@@ -1,5 +1,5 @@
-const CACHE='mingji-otter-v20-1';
-const ASSETS=['./','./index.html','./admin.html','./manifest.webmanifest','./icon.svg'];
+const CACHE='mingji-otter-v20-1-1';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./icon.svg'];
 
 self.addEventListener('install',event=>{
   event.waitUntil(
@@ -19,8 +19,12 @@ self.addEventListener('activate',event=>{
 
 self.addEventListener('fetch',event=>{
   if(event.request.method!=='GET') return;
-  if(new URL(event.request.url).origin!==location.origin) return;
-
+  const url=new URL(event.request.url);
+  if(url.origin!==location.origin) return;
+  if(url.pathname.endsWith('/admin') || url.pathname.endsWith('/admin.html')){
+    event.respondWith(fetch(event.request,{cache:'no-store'}));
+    return;
+  }
   event.respondWith(
     fetch(event.request)
       .then(response=>{
